@@ -47,10 +47,14 @@ jobs:
           aws-region: us-east-1
 
       - name: Upload to S3
-        run: aws s3 sync dist/ s3://${{ secrets.S3_BUCKET }} --delete
+        run: |
+          BUCKET="$(echo -n "$S3_BUCKET" | tr -d '\r\n')"
+          aws s3 sync dist/ "s3://${BUCKET}" --delete
 
       - name: Invalidate CloudFront
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        run: |
+          DIST_ID="$(echo -n "$CLOUDFRONT_DISTRIBUTION_ID" | tr -d '\r\n')"
+          aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 
   deploy-backend:
     runs-on: ubuntu-latest
