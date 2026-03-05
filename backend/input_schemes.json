@@ -1,0 +1,25 @@
+{
+  "index_name": "schemes_index",
+  "documents": [
+    {
+      "document_id": "ayushman-001",
+      "document_name": "ayushman_bharat.pdf",
+      "local_path": "data/schemes/ayushman_bharat.pdf",
+      "metadata": {
+        "scheme_name": "Ayushman Bharat PM-JAY",
+        "scheme_type": "health",
+        "ministry": "Ministry of Health and Family Welfare",
+        "state": "Central",
+        "beneficiary": "BPL families",
+        "annual_benefit": "5 lakh INR per family",
+        "content_type": "official_guidelines"
+      }
+    }
+  ],
+  "options": {
+    "delete_existing": true,
+    "validate_after_insert": true,
+    "chunk_size": 256,
+    "chunk_overlap": 64
+  }
+}

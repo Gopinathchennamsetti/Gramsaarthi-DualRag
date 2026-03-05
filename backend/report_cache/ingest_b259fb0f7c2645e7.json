@@ -1,0 +1,16 @@
+{
+  "interaction_id": "5c5cbc99-9c2a-4ac3-a2c0-3c3b0c298c58",
+  "index_name": "citizen_faq_index",
+  "status": "success",
+  "results": [
+    {
+      "document_id": "doc-d83a3992",
+      "document_name": "Ayushman-bharat-faq.pdf",
+      "status": "success",
+      "chunks_created": 12,
+      "chunks_inserted": 12,
+      "validation_passed": true
+    }
+  ],
+  "hash_key": "b259fb0f7c2645e7"
+}

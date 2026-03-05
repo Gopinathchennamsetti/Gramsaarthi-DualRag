@@ -1,0 +1,69 @@
+{
+  "interaction_id": "3647ca69-940b-4988-b5d5-8d0117c1992d",
+  "question": "what is ayushman bharat?",
+  "final_answer": "Ayushman Bharat is a major government initiative aimed at improving the health of Indians. It has two main pillars. The first is strengthening primary healthcare through Health and Wellness Centers (HWCs). These centers provide essential health services closer to your home. The second, and perhaps most well-known, part is the Pradhan Mantri Jan Arogya Yojana (PMJAY). PMJAY acts as a health insurance scheme, providing financial protection for expensive medical treatments (secondary and tertiary care) to a large number of families. The idea is that by strengthening primary care at HWCs, many health issues can be managed early, and for more serious conditions, PMJAY ensures you don't face huge medical bills.",
+  "eligibility": "Eligibility for PMJAY is primarily based on socio-economic status and family size, aiming to cover approximately 40% of India's population. Specific eligibility details are often determined by government lists based on deprivation and occupational criteria. To check if you are eligible, you can visit the official PMJAY website or contact their helpline. Often, your eligibility is pre-determined based on government surveys.",
+  "benefits": [
+    "Access to comprehensive primary healthcare services at Health and Wellness Centers.",
+    "Financial protection for secondary and tertiary medical treatments up to a certain limit per family per year under PMJAY.",
+    "Access to a network of public and private hospitals for treatment under PMJAY.",
+    "Health promotion and disease prevention services."
+  ],
+  "how_to_apply": [
+    "Check your eligibility for PMJAY through the official Ayushman Bharat website or by calling the helpline.",
+    "If eligible, obtain your Ayushman Card from designated centers or through authorized personnel.",
+    "For availing services, present your Ayushman Card at empaneled hospitals for cashless treatment."
+  ],
+  "documents_required": [
+    "Proof of Identity (e.g., Aadhaar Card, Voter ID, Ration Card)",
+    "Proof of Address",
+    "Ration Card (often used for family identification)",
+    "Socio-economic Caste Census (SECC) 2011 details (if applicable for eligibility verification)"
+  ],
+  "practical_tips": [
+    "Understand that HWCs are your first point of contact for general health needs and preventive care.",
+    "Keep your Ayushman Card safe and know where to use it. It's your key to cashless treatment under PMJAY.",
+    "Ask hospital staff about the empaneled services and procedures covered under PMJAY before admission."
+  ],
+  "helpline": "Toll-free National Health Helpline: 14555 or 1800-111-565. Official Website: pmjay.gov.in",
+  "schemes_covered": [
+    "Ayushman Bharat",
+    "Pradhan Mantri Jan Arogya Yojana (PMJAY)"
+  ],
+  "confidence_score": 0.9,
+  "intermediate": {
+    "scheme_answer": {
+      "answer": "Ayushman Bharat is a scheme focused on comprehensive primary health care delivered through Health and Wellness Centers (HWCs). It aims to strengthen primary and secondary care infrastructure and provide universal health coverage. A key component of Ayushman Bharat is the Pradhan Mantri Jan Arogya Yojana (PMJAY), which offers financial protection for secondary and tertiary care to a significant portion of Indian households. The success of PMJAY relies on the effectiveness of the comprehensive primary health care provided through HWCs. The scheme also involves community mobilization, health promotion, and the delivery of expanded services at wellness centers.",
+      "scheme_names": [
+        "Ayushman Bharat",
+        "Pradhan Mantri Jan Arogya Yojana"
+      ],
+      "eligibility_summary": "The provided documents do not explicitly detail eligibility criteria for Ayushman Bharat or PMJAY. However, PMJAY aims to provide financial protection to about 40% of India's households.",
+      "key_benefits": [
+        "Comprehensive primary health care through Health and Wellness Centers",
+        "Financial protection for secondary and tertiary care (through PMJAY)",
+        "Universal Health Coverage",
+        "Strengthening primary and secondary care infrastructure",
+        "Health promotion and community mobilization"
+      ],
+      "sources": [
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:1",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:3",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:17",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:20",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:28",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:69"
+      ]
+    },
+    "citizen_answer": {
+      "answer": "No citizen FAQ data available yet. Please ingest FAQ documents.",
+      "common_confusions": [],
+      "practical_tips": [],
+      "related_questions": []
+    },
+    "scheme_docs_retrieved": 8,
+    "citizen_docs_retrieved": 0,
+    "processing_time_seconds": 6.8
+  },
+  "hash_key": "36c942ef8e61f91d"
+}

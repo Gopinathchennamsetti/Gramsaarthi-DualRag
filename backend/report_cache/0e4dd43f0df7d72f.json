@@ -1,0 +1,71 @@
+{
+  "interaction_id": "7e84c821-97ea-40fb-b11a-95b49bb74a5e",
+  "question": "what is  ayush bharat health account?",
+  "final_answer": "The Ayushman Bharat Health Account (ABHA), also known as a Health ID, is a unique digital health identifier that acts like a personal health account. It's designed to create a digital health ecosystem in India by linking all your health records. Think of it as a digital locker for your medical history. You get a 14-digit ABHA number, and you can also create an easy-to-remember ABHA address (like 'yourname@abdm') to easily access and share your health records digitally with healthcare providers. The ABHA mobile app is a convenient tool to manage these records. It's important to understand that ABHA is not a health insurance scheme like Ayushman Bharat-PMJAY, nor does it replace existing services like CGHS. It's an add-on that helps you manage your health information digitally. You are in control of what you share; you can choose to share specific records with specific providers, and not all your medical history will be visible to everyone.",
+  "eligibility": "Any Indian citizen can create an ABHA number. You can create one for free. If you are a CGHS beneficiary, ensure your mobile number is linked to your CGHS card and Aadhaar card.",
+  "benefits": [
+    "Creates a unique digital health identifier (ABHA number and ABHA address).",
+    "Links all your health records into a single digital account.",
+    "Facilitates easy access and digital sharing of health records with healthcare providers.",
+    "Allows you to receive digital prescriptions and lab reports.",
+    "Empowers you to control which health records are shared and with whom."
+  ],
+  "how_to_apply": [
+    "Download the ABHA mobile application from your app store.",
+    "Follow the on-screen instructions to create your ABHA number using your Aadhaar or mobile number.",
+    "Optionally, create an ABHA address for easier access to your health records."
+  ],
+  "documents_required": [
+    "Aadhaar Card (for creation via Aadhaar)",
+    "Mobile Number (must be linked to Aadhaar for OTP verification)",
+    "CGHS Card (if applicable, for linking)"
+  ],
+  "practical_tips": [
+    "Creating an ABHA number is free of cost.",
+    "Use the ABHA mobile app to easily manage and share your health records, including receiving digital prescriptions and lab reports.",
+    "Remember that you have control over your data; you decide what to share and with whom."
+  ],
+  "helpline": "For more information, visit the official ABDM website or download the ABHA mobile application.",
+  "schemes_covered": [
+    "Ayushman Bharat Health Account (ABHA)"
+  ],
+  "confidence_score": 0.9,
+  "intermediate": {
+    "scheme_answer": {
+      "answer": "The provided documents do not contain information about the 'Ayushman Bharat Health Account'. The documents focus on the Ayushman Bharat scheme's comprehensive primary healthcare through Health and Wellness Centers, including aspects like yoga and AYUSH mainstreaming, health promotion activities, and the role of Health and Wellness Ambassadors in schools.",
+      "scheme_names": [
+        "Ayushman Bharat"
+      ],
+      "eligibility_summary": "Not specified in the provided documents.",
+      "key_benefits": [],
+      "sources": [
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:63",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:1",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:65",
+        "e5dd4e0f255f40578e8fed3f97f4787b_ayushman_bharat.pdf:71"
+      ]
+    },
+    "citizen_answer": {
+      "answer": "The Ayushman Bharat Health Account (ABHA), also known as a Health ID, is a unique health identifier that acts as an account or number to link all your health records. It aims to create a digital health ecosystem in India, promoting the digitization of healthcare services. An ABHA number is a random 14-digit number, and you can also create an easy-to-remember ABHA address, like 'name@abdm', to access and share your health records digitally with various healthcare providers. The ABHA mobile application offers a convenient way to manage these records.",
+      "common_confusions": [
+        "ABHA is not a specific health scheme like Ayushman Bharat-Pradhan Mantri Jan Arogya Yojana (AB-PMJAY) and does not automatically make you eligible for it.",
+        "ABHA is not a replacement for existing services like CGHS (Central Government Health Scheme) but rather an addition or add-on to them.",
+        "Linking all health records to ABHA does not mean all doctors can see your entire medical history; you can choose to share only selected health records with specific providers through digital consent."
+      ],
+      "practical_tips": [
+        "You can create an ABHA number for free. Ensure your mobile number is linked to your CGHS card and Aadhaar card if you are a CGHS beneficiary.",
+        "The ABHA mobile application allows you to easily access and share your health records digitally, including receiving digital lab reports and prescriptions."
+      ],
+      "related_questions": [
+        "What is an ABHA address?",
+        "How can I link my ABHA number with my CGHS ID?",
+        "Can my health records be accessed by the government through ABHA?",
+        "Can ABHA be used outside government hospitals?"
+      ]
+    },
+    "scheme_docs_retrieved": 8,
+    "citizen_docs_retrieved": 8,
+    "processing_time_seconds": 8.45
+  },
+  "hash_key": "0e4dd43f0df7d72f"
+}

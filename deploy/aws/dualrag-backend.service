@@ -1,0 +1,16 @@
+[Unit]
+Description=DualRAG FastAPI Backend
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/dualrag_app_web/backend
+Environment="PYTHONUNBUFFERED=1"
+EnvironmentFile=/opt/dualrag_app_web/backend/.env
+ExecStart=/opt/dualrag_app_web/.venv/bin/python -m uvicorn main:app --host 127.0.0.1 --port 8080
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

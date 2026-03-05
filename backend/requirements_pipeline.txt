@@ -1,0 +1,57 @@
+# ============================================================
+# Government Schemes Dual RAG — Requirements
+# ============================================================
+
+# Web Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+python-dotenv>=1.0.0
+
+# PDF Processing
+PyMuPDF>=1.23.8
+
+# LangChain
+langchain-core>=0.1.0
+langchain-text-splitters>=0.0.1
+tiktoken>=0.5.2
+
+# Open-source embedding fallback
+sentence-transformers>=2.2.2
+
+# Vector Store — ChromaDB (local, zero cost)
+chromadb>=0.4.22
+
+# Vector Store — OpenSearch (production, optional)
+# opensearch-py>=2.4.2
+
+# ── LLM Provider: OpenAI (uncomment if using OpenAI)
+openai>=1.30.0
+
+# ── LLM Provider: Gemini
+# This codebase uses `from google import genai` (google-genai SDK).
+google-genai>=1.0.0
+
+# ── LLM Provider: AWS Bedrock (uncomment if using Bedrock)
+# boto3>=1.29.7   (already included below for S3)
+
+# AWS SDK
+boto3>=1.29.7
+
+# NLP Enrichment
+rake-nltk>=1.0.6
+nltk>=3.8.1
+spacy>=3.7.0
+# After install run: python -m spacy download en_core_web_sm
+
+# Text Matching (for justification mapping)
+rapidfuzz>=3.5.2
+
+# ML (optional reranker)
+# torch>=2.1.0
+# transformers>=4.36.0
+# numpy>=1.24.3
+
+# Utilities
+pydantic>=2.0.0
+
+reportlab>=4.2.0

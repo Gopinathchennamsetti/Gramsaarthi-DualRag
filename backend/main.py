@@ -1,0 +1,733 @@
+"""
+DualRAG FastAPI Backend — main.py
+===================================
+Sits in the SAME directory as execution.py and ingestion.py so imports
+work with a plain:
+    from execution import DualRAGProcessor
+    from ingestion import IngestionPipeline
+
+Directory layout (everything in backend/):
+    backend/
+    ├── main.py                ← THIS FILE
+    ├── execution.py           ← your core retrieval + LLM logic
+    ├── ingestion.py           ← your core PDF ingestion pipeline
+    ├── config.json
+    ├── .env
+    ├── input_schemes.json
+    ├── input_faqs.json
+    ├── data/
+    │   ├── schemes/
+    │   └── faqs/
+    ├── chroma_db/             ← auto-created by chromadb
+    └── report_cache/          ← auto-created here for caching
+"""
+
+import os
+import sys
+import json
+import hashlib
+import logging
+import html
+from io import BytesIO
+import textwrap
+import time
+from pathlib import Path
+from typing import Optional
+from uuid import uuid4
+from botocore.exceptions import BotoCoreError, ClientError
+
+# Ensure this file's own directory is first on sys.path so that
+# `import execution` and `import ingestion` resolve to the sibling files.
+_HERE = Path(__file__).parent.resolve()
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
+
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
+import uvicorn
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger(__name__)
+
+CACHE_DIR = _HERE / "report_cache"
+CACHE_DIR.mkdir(exist_ok=True)
+
+UPLOAD_DIR = _HERE / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+# Cache backend: local | dynamodb | hybrid
+CACHE_BACKEND = os.getenv("CACHE_BACKEND", "local").strip().lower()
+DYNAMODB_TABLE_NAME = os.getenv("DYNAMODB_TABLE", "").strip()
+AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
+_dynamodb_table = None
+
+# ---------------------------------------------------------------------------
+# Import execution.py and ingestion.py (your core logic)
+# ---------------------------------------------------------------------------
+try:
+    from execution import DualRAGProcessor, config as exec_config
+    from execution import _chroma_count, _opensearch_count
+    logger.info("✅  execution.py imported OK")
+    EXECUTION_AVAILABLE = True
+except Exception as exc:
+    logger.warning(f"⚠   execution.py import failed: {exc}")
+    logger.warning("    Running in MOCK mode for queries.")
+    EXECUTION_AVAILABLE = False
+    exec_config = None
+
+try:
+    from ingestion import IngestionPipeline
+    logger.info("✅  ingestion.py imported OK")
+    INGESTION_AVAILABLE = True
+except Exception as exc:
+    logger.warning(f"⚠   ingestion.py import failed: {exc}")
+    INGESTION_AVAILABLE = False
+
+# Singletons reused across all requests
+_processor = None
+_ingestion_pipeline = None
+
+
+def get_processor():
+    global _processor
+    if _processor is None:
+        _processor = DualRAGProcessor()
+    return _processor
+
+
+def get_ingestion_pipeline():
+    global _ingestion_pipeline
+    if _ingestion_pipeline is None:
+        _ingestion_pipeline = IngestionPipeline()
+    return _ingestion_pipeline
+
+
+# ---------------------------------------------------------------------------
+# Hash helpers
+# ---------------------------------------------------------------------------
+
+def compute_query_hash(question: str, filters: dict, options: dict) -> str:
+    payload = json.dumps({"question": question, "filters": filters, "options": options}, sort_keys=True)
+    return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+
+def compute_ingestion_hash(filename: str, index_name: str, doc_type: str, metadata: dict) -> str:
+    payload = json.dumps({"filename": filename, "index_name": index_name, "doc_type": doc_type, "metadata": metadata}, sort_keys=True)
+    return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+
+def _cache_path(key: str) -> Path:
+    return CACHE_DIR / f"{key}.json"
+
+
+def _is_ddb_enabled() -> bool:
+    return CACHE_BACKEND in {"dynamodb", "hybrid"} and bool(DYNAMODB_TABLE_NAME)
+
+
+def _get_dynamodb_table():
+    global _dynamodb_table
+    if _dynamodb_table is None and _is_ddb_enabled():
+        import boto3
+        ddb = boto3.resource("dynamodb", region_name=AWS_REGION)
+        _dynamodb_table = ddb.Table(DYNAMODB_TABLE_NAME)
+    return _dynamodb_table
+
+
+def _ddb_get_cache(key: str):
+    try:
+        table = _get_dynamodb_table()
+        if not table:
+            return None
+        resp = table.get_item(Key={"hash_key": key})
+        item = resp.get("Item")
+        if not item:
+            return None
+        payload = item.get("payload")
+        if isinstance(payload, str):
+            return json.loads(payload)
+        return payload
+    except (BotoCoreError, ClientError, json.JSONDecodeError) as exc:
+        logger.warning(f"DynamoDB read failed for {key}: {exc}")
+        return None
+
+
+def _ddb_put_cache(key: str, data: dict):
+    try:
+        table = _get_dynamodb_table()
+        if not table:
+            return
+        table.put_item(Item={
+            "hash_key": key,
+            "cache_type": "ingestion" if key.startswith("ingest_") else "query",
+            "label": data.get("question") or data.get("index_name") or key,
+            "timestamp": int(time.time()),
+            "payload": json.dumps(data, ensure_ascii=False),
+        })
+    except (BotoCoreError, ClientError) as exc:
+        logger.warning(f"DynamoDB write failed for {key}: {exc}")
+
+
+def _ddb_delete_cache(key: str) -> bool:
+    try:
+        table = _get_dynamodb_table()
+        if not table:
+            return False
+        table.delete_item(Key={"hash_key": key})
+        return True
+    except (BotoCoreError, ClientError) as exc:
+        logger.warning(f"DynamoDB delete failed for {key}: {exc}")
+        return False
+
+
+def _ddb_list_entries():
+    try:
+        table = _get_dynamodb_table()
+        if not table:
+            return []
+        items = []
+        scan_kwargs = {
+            "ProjectionExpression": "hash_key, cache_type, label, #ts",
+            "ExpressionAttributeNames": {"#ts": "timestamp"},
+        }
+        resp = table.scan(**scan_kwargs)
+        items.extend(resp.get("Items", []))
+        while "LastEvaluatedKey" in resp:
+            resp = table.scan(ExclusiveStartKey=resp["LastEvaluatedKey"], **scan_kwargs)
+            items.extend(resp.get("Items", []))
+        return [{
+            "hash_key": str(i.get("hash_key")),
+            "type": str(i.get("cache_type", "query")),
+            "label": str(i.get("label", i.get("hash_key", ""))),
+            "timestamp": float(i.get("timestamp", 0)),
+        } for i in items if i.get("hash_key")]
+    except (BotoCoreError, ClientError) as exc:
+        logger.warning(f"DynamoDB list failed: {exc}")
+        return []
+
+
+def load_cache(key: str):
+    # Prefer DynamoDB when configured to survive EC2 instance replacement.
+    if CACHE_BACKEND in {"dynamodb", "hybrid"}:
+        data = _ddb_get_cache(key)
+        if data is not None:
+            return data
+        if CACHE_BACKEND == "dynamodb":
+            return None
+
+    p = _cache_path(key)
+    if p.exists():
+        try:
+            return json.loads(p.read_text())
+        except Exception:
+            pass
+    return None
+
+
+def save_cache(key: str, data: dict):
+    if CACHE_BACKEND in {"local", "hybrid"}:
+        _cache_path(key).write_text(json.dumps(data, ensure_ascii=False, indent=2))
+    if CACHE_BACKEND in {"dynamodb", "hybrid"}:
+        _ddb_put_cache(key, data)
+
+
+def _to_list(value):
+    if isinstance(value, list):
+        return value
+    if value is None or value == "":
+        return []
+    return [value]
+
+
+def _safe_filename_part(value: str) -> str:
+    clean = "".join(ch for ch in str(value) if ch.isalnum() or ch in ("-", "_"))
+    return clean[:32] or "report"
+
+
+def _build_report_text(report: dict) -> str:
+    inter = report.get("intermediate") or {}
+    lines = [
+        "DUALRAG REPORT",
+        "=" * 70,
+        f"Question: {report.get('question', '-')}",
+        f"Generated Hash: {report.get('hash_key', '-')}",
+        f"Confidence: {round(float(report.get('confidence_score', 0) or 0) * 100)}%",
+        "",
+        "FINAL ANSWER",
+        "-" * 70,
+        str(report.get("final_answer", "-")),
+        "",
+        "ELIGIBILITY",
+        "-" * 70,
+        str(report.get("eligibility", "-")),
+        "",
+        "BENEFITS",
+        "-" * 70,
+    ]
+    for i, item in enumerate(_to_list(report.get("benefits")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend(["", "HOW TO APPLY", "-" * 70])
+    for i, item in enumerate(_to_list(report.get("how_to_apply")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend(["", "DOCUMENTS REQUIRED", "-" * 70])
+    for i, item in enumerate(_to_list(report.get("documents_required")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend(["", "PRACTICAL TIPS", "-" * 70])
+    for i, item in enumerate(_to_list(report.get("practical_tips")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend([
+        "",
+        "HELPLINE",
+        "-" * 70,
+        str(report.get("helpline", "-")),
+        "",
+        "RETRIEVAL SUMMARY",
+        "-" * 70,
+        f"schemes_index docs: {inter.get('scheme_docs_retrieved', '-')}",
+        f"citizen_faq_index docs: {inter.get('citizen_docs_retrieved', '-')}",
+        f"processing_time_seconds: {inter.get('processing_time_seconds', '-')}",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def _build_report_html(report: dict) -> str:
+    inter = report.get("intermediate") or {}
+
+    def esc(v):
+        return html.escape(str(v if v is not None else "-"))
+
+    def list_html(values):
+        items = "".join(f"<li>{esc(v)}</li>" for v in _to_list(values))
+        return f"<ol>{items}</ol>" if items else "<p>-</p>"
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DualRAG Report</title>
+  <style>
+    body {{ margin: 0; background: #ecf7ff; color: #1a2333; font-family: "Segoe UI", "Trebuchet MS", sans-serif; }}
+    .page {{ max-width: 860px; margin: 28px auto; padding: 0 16px; }}
+    .card {{ background: #fff; border: 1px solid #c7dcd7; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(27,43,67,0.08); }}
+    .title {{ margin: 0; color: #0f766e; letter-spacing: .03em; }}
+    .meta {{ color: #46566c; font-size: 13px; margin-top: 6px; }}
+    .sec {{ margin-top: 20px; }}
+    .sec h2 {{ margin: 0 0 8px; font-size: 14px; text-transform: uppercase; letter-spacing: .12em; color: #46566c; }}
+    p, li {{ line-height: 1.65; font-size: 14px; }}
+    ol {{ margin: 0; padding-left: 20px; }}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <h1 class="title">DualRAG Report</h1>
+      <div class="meta">Question: {esc(report.get("question"))}</div>
+      <div class="meta">Hash: {esc(report.get("hash_key"))} | Confidence: {round(float(report.get("confidence_score", 0) or 0) * 100)}%</div>
+
+      <section class="sec"><h2>Final Answer</h2><p>{esc(report.get("final_answer"))}</p></section>
+      <section class="sec"><h2>Eligibility</h2><p>{esc(report.get("eligibility"))}</p></section>
+      <section class="sec"><h2>Benefits</h2>{list_html(report.get("benefits"))}</section>
+      <section class="sec"><h2>How To Apply</h2>{list_html(report.get("how_to_apply"))}</section>
+      <section class="sec"><h2>Documents Required</h2>{list_html(report.get("documents_required"))}</section>
+      <section class="sec"><h2>Practical Tips</h2>{list_html(report.get("practical_tips"))}</section>
+      <section class="sec"><h2>Helpline</h2><p>{esc(report.get("helpline"))}</p></section>
+      <section class="sec"><h2>Retrieval Summary</h2>
+        <p>schemes_index docs: {esc(inter.get("scheme_docs_retrieved", "-"))}</p>
+        <p>citizen_faq_index docs: {esc(inter.get("citizen_docs_retrieved", "-"))}</p>
+        <p>processing_time_seconds: {esc(inter.get("processing_time_seconds", "-"))}</p>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+
+def _build_report_pdf(report: dict) -> bytes:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
+
+    inter = report.get("intermediate") or {}
+    lines = [
+        "DUALRAG REPORT",
+        "=" * 60,
+        f"Question: {report.get('question', '-')}",
+        f"Hash: {report.get('hash_key', '-')}",
+        f"Confidence: {round(float(report.get('confidence_score', 0) or 0) * 100)}%",
+        "",
+        "FINAL ANSWER",
+        str(report.get("final_answer", "-")),
+        "",
+        "ELIGIBILITY",
+        str(report.get("eligibility", "-")),
+        "",
+        "BENEFITS",
+    ]
+    for i, item in enumerate(_to_list(report.get("benefits")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend(["", "HOW TO APPLY"])
+    for i, item in enumerate(_to_list(report.get("how_to_apply")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend(["", "DOCUMENTS REQUIRED"])
+    for i, item in enumerate(_to_list(report.get("documents_required")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend(["", "PRACTICAL TIPS"])
+    for i, item in enumerate(_to_list(report.get("practical_tips")), 1):
+        lines.append(f"{i}. {item}")
+    lines.extend([
+        "",
+        "HELPLINE",
+        str(report.get("helpline", "-")),
+        "",
+        "RETRIEVAL SUMMARY",
+        f"schemes_index docs: {inter.get('scheme_docs_retrieved', '-')}",
+        f"citizen_faq_index docs: {inter.get('citizen_docs_retrieved', '-')}",
+        f"processing_time_seconds: {inter.get('processing_time_seconds', '-')}",
+    ])
+
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+    margin_x = 42
+    margin_y = 42
+    y = height - margin_y
+
+    def ensure_page(font_name="Helvetica", font_size=10):
+        nonlocal y
+        if y < margin_y:
+            c.showPage()
+            c.setFont(font_name, font_size)
+            y = height - margin_y
+
+    for raw in lines:
+        text = str(raw).replace("₹", "Rs")
+        if text == "":
+            y -= 8
+            ensure_page()
+            continue
+
+        is_heading = text.isupper() and len(text) < 45
+        font_name = "Helvetica-Bold" if is_heading else "Helvetica"
+        font_size = 11 if is_heading else 10
+        c.setFont(font_name, font_size)
+        wrapped = textwrap.wrap(text, width=100) or [text]
+        for part in wrapped:
+            ensure_page(font_name, font_size)
+            c.drawString(margin_x, y, part)
+            y -= 14
+
+    c.save()
+    buffer.seek(0)
+    return buffer.read()
+
+
+# ---------------------------------------------------------------------------
+# Mock result (used when execution.py fails to load)
+# ---------------------------------------------------------------------------
+
+def _mock_query_result(question: str, hash_key: str) -> dict:
+    return {
+        "interaction_id": str(uuid4()),
+        "question": question,
+        "final_answer": f"[MOCK] execution.py is not loaded. Demo answer for: '{question}'.",
+        "eligibility": "Families in SECC 2011 database with annual income below ₹2.5 lakh.",
+        "benefits": ["Annual coverage up to ₹5 lakh", "Cashless hospitalisation", "1,949 procedures covered"],
+        "how_to_apply": ["Visit pmjay.gov.in", "Go to nearest CSC", "Bring Aadhaar + Ration Card"],
+        "documents_required": ["Aadhaar Card", "Ration Card"],
+        "practical_tips": ["Enrolment is FREE", "Save helpline 14555"],
+        "helpline": "14555 | pmjay.gov.in",
+        "schemes_covered": ["Ayushman Bharat PM-JAY"],
+        "confidence_score": 0.0,
+        "intermediate": {
+            "scheme_answer": {"answer": "Mock — execution.py not loaded", "scheme_names": [], "eligibility_summary": "", "key_benefits": [], "sources": []},
+            "citizen_answer": {"answer": "Mock — execution.py not loaded", "common_confusions": [], "practical_tips": [], "related_questions": []},
+            "scheme_docs_retrieved": 0,
+            "citizen_docs_retrieved": 0,
+            "processing_time_seconds": 0.0,
+        },
+        "hash_key": hash_key,
+        "_mock": True,
+    }
+
+
+# ---------------------------------------------------------------------------
+# FastAPI
+# ---------------------------------------------------------------------------
+
+app = FastAPI(title="DualRAG API", version="2.0.0")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+
+@app.get("/api/health")
+async def health():
+    return {
+        "status": "healthy",
+        "execution_available": EXECUTION_AVAILABLE,
+        "ingestion_available": INGESTION_AVAILABLE,
+        "llm_provider": exec_config.get("llm.provider") if exec_config else "unknown",
+        "vector_store": exec_config.get("vector_store.type") if exec_config else "unknown",
+        "cache_backend": CACHE_BACKEND,
+        "dynamodb_table": DYNAMODB_TABLE_NAME if _is_ddb_enabled() else None,
+        "pipeline_dir": str(_HERE),
+    }
+
+
+@app.get("/api/indexes/stats")
+async def index_stats():
+    if not EXECUTION_AVAILABLE:
+        return {"schemes_index_count": 0, "citizen_faq_index_count": 0, "error": "execution.py not loaded"}
+    try:
+        store_type = exec_config.get("vector_store.type", "chroma")
+        s_idx = exec_config.get("indices.schemes_index", "schemes_index")
+        c_idx = exec_config.get("indices.citizen_faq_index", "citizen_faq_index")
+        if store_type == "chroma":
+            return {"schemes_index_count": _chroma_count(s_idx), "citizen_faq_index_count": _chroma_count(c_idx)}
+        return {"schemes_index_count": _opensearch_count(s_idx), "citizen_faq_index_count": _opensearch_count(c_idx)}
+    except Exception as e:
+        return {"schemes_index_count": 0, "citizen_faq_index_count": 0, "error": str(e)}
+
+
+# ── Report: check ─────────────────────────────────────────────────────────────
+
+@app.post("/api/report/check")
+async def check_report(request: Request):
+    body = await request.json()
+    question = body.get("question", "").strip()
+    if not question:
+        raise HTTPException(400, "question is required")
+    filters = body.get("filters", {})
+    options = body.get("options", {})
+    hash_key = compute_query_hash(question, filters, options)
+    cached = load_cache(hash_key)
+    if cached:
+        return {"exists": True, "hash_key": hash_key, "report": cached}
+    return {"exists": False, "hash_key": hash_key}
+
+
+# ── Report: execute ───────────────────────────────────────────────────────────
+
+@app.post("/api/report/execute")
+async def execute_report(request: Request):
+    """
+    Calls execution.py → DualRAGProcessor.query()
+    Body: { question, filters?, options?, force? }
+    """
+    body = await request.json()
+    question = body.get("question", "").strip()
+    if not question:
+        raise HTTPException(400, "question is required")
+    filters = body.get("filters", {})
+    options = body.get("options", {})
+    force = body.get("force", False)
+
+    hash_key = compute_query_hash(question, filters, options)
+
+    if not force:
+        cached = load_cache(hash_key)
+        if cached:
+            logger.info(f"Cache HIT  {hash_key}")
+            return {**cached, "_cached": True, "hash_key": hash_key}
+
+    logger.info(f"Cache MISS {hash_key} — running query via execution.py")
+
+    if not EXECUTION_AVAILABLE:
+        result = _mock_query_result(question, hash_key)
+        save_cache(hash_key, result)
+        return {**result, "_cached": False}
+
+    try:
+        result = await get_processor().query({"question": question, "filters": filters, "options": options})
+        result["hash_key"] = hash_key
+        save_cache(hash_key, result)
+        return {**result, "_cached": False}
+    except Exception as e:
+        logger.error(f"execution.py query failed: {e}")
+        raise HTTPException(500, f"Query failed: {e}")
+
+
+@app.post("/api/report/download")
+async def download_report(request: Request):
+    body = await request.json()
+    report = body.get("report")
+    fmt = (body.get("format") or "html").lower()
+
+    if not isinstance(report, dict):
+        raise HTTPException(400, "report object is required")
+    if fmt not in {"html", "txt", "json", "pdf"}:
+        raise HTTPException(400, "format must be one of: html, txt, json, pdf")
+
+    hash_key = _safe_filename_part(report.get("hash_key", "report"))
+    if fmt == "html":
+        content = _build_report_html(report)
+        media_type = "text/html; charset=utf-8"
+        ext = "html"
+    elif fmt == "txt":
+        content = _build_report_text(report)
+        media_type = "text/plain; charset=utf-8"
+        ext = "txt"
+    elif fmt == "json":
+        content = json.dumps(report, ensure_ascii=False, indent=2)
+        media_type = "application/json"
+        ext = "json"
+    else:
+        content = _build_report_pdf(report)
+        media_type = "application/pdf"
+        ext = "pdf"
+
+    filename = f"dualrag_report_{hash_key}.{ext}"
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/api/report/cache/{hash_key}")
+async def get_cached_report(hash_key: str):
+    if hash_key.startswith("ingest_"):
+        raise HTTPException(400, "ingestion cache key is not a report")
+    cached = load_cache(hash_key)
+    if not cached:
+        raise HTTPException(404, "report not found")
+    return {**cached, "_cached": True, "hash_key": hash_key}
+
+
+# ── Ingestion: check ──────────────────────────────────────────────────────────
+
+@app.post("/api/ingest/check")
+async def check_ingestion(request: Request):
+    body = await request.json()
+    hash_key = compute_ingestion_hash(
+        body.get("filename", ""),
+        body.get("index_name", ""),
+        body.get("document_type", ""),
+        body.get("metadata", {}),
+    )
+    cached = load_cache(f"ingest_{hash_key}")
+    if cached:
+        return {"exists": True, "hash_key": hash_key, "result": cached}
+    return {"exists": False, "hash_key": hash_key}
+
+
+# ── Ingestion: run ────────────────────────────────────────────────────────────
+
+@app.post("/api/ingest")
+async def ingest_document(
+    file: UploadFile = File(...),
+    index_name: str = Form(...),
+    document_type: str = Form("official_guidelines"),
+    metadata_json: str = Form("{}"),
+    force: str = Form("false"),
+):
+    """
+    Calls ingestion.py → IngestionPipeline.ingest()
+    """
+    try:
+        extra_meta = json.loads(metadata_json)
+    except Exception:
+        extra_meta = {}
+
+    filename = file.filename or "unknown.pdf"
+    force_bool = force.lower() == "true"
+    hash_key = compute_ingestion_hash(filename, index_name, document_type, extra_meta)
+    cache_key = f"ingest_{hash_key}"
+
+    if not force_bool:
+        cached = load_cache(cache_key)
+        if cached:
+            logger.info(f"Ingest cache HIT  {hash_key}")
+            return {**cached, "_cached": True, "hash_key": hash_key}
+
+    # Save file locally — ingestion.py needs a path on disk
+    dest = UPLOAD_DIR / f"{uuid4().hex}_{filename}"
+    dest.write_bytes(await file.read())
+    logger.info(f"Upload saved → {dest}")
+
+    doc_metadata = {
+        "scheme_name": extra_meta.get("scheme_name", filename.replace(".pdf", "").replace("_", " ").title()),
+        "scheme_type": extra_meta.get("scheme_type", "general"),
+        "content_type": document_type,
+        **extra_meta,
+    }
+
+    request_body = {
+        "index_name": index_name,
+        "documents": [{
+            "document_id": f"doc-{uuid4().hex[:8]}",
+            "document_name": filename,
+            "local_path": str(dest),
+            "metadata": doc_metadata,
+        }],
+        "options": {"delete_existing": True, "validate_after_insert": True},
+    }
+
+    if not INGESTION_AVAILABLE:
+        mock_result = {
+            "interaction_id": str(uuid4()),
+            "index_name": index_name,
+            "status": "success",
+            "results": [{"document_id": request_body["documents"][0]["document_id"], "document_name": filename,
+                          "status": "success", "chunks_created": 0, "chunks_inserted": 0, "validation_passed": False,
+                          "note": "ingestion.py not loaded — mock result"}],
+            "_mock": True,
+        }
+        save_cache(cache_key, mock_result)
+        return {**mock_result, "_cached": False, "hash_key": hash_key}
+
+    try:
+        result = await get_ingestion_pipeline().ingest(request_body)
+        result["hash_key"] = hash_key
+        save_cache(cache_key, result)
+        return {**result, "_cached": False}
+    except Exception as e:
+        logger.error(f"ingestion.py ingest failed: {e}")
+        raise HTTPException(500, f"Ingestion failed: {e}")
+
+
+# ── Cache management ──────────────────────────────────────────────────────────
+
+@app.get("/api/cache/list")
+async def list_cache():
+    by_key = {}
+    # Local entries
+    if CACHE_BACKEND in {"local", "hybrid"}:
+        for p in CACHE_DIR.glob("*.json"):
+            try:
+                data = json.loads(p.read_text())
+                by_key[p.stem] = {
+                    "hash_key": p.stem,
+                    "type": "ingestion" if p.stem.startswith("ingest_") else "query",
+                    "label": data.get("question") or data.get("index_name") or p.stem,
+                    "timestamp": p.stat().st_mtime,
+                }
+            except Exception:
+                pass
+
+    # DynamoDB entries
+    if CACHE_BACKEND in {"dynamodb", "hybrid"}:
+        for item in _ddb_list_entries():
+            by_key[item["hash_key"]] = item
+
+    entries = sorted(by_key.values(), key=lambda x: x.get("timestamp", 0), reverse=True)
+    return {"entries": entries}
+
+
+@app.delete("/api/cache/{hash_key}")
+async def delete_cache_entry(hash_key: str):
+    deleted = False
+    if CACHE_BACKEND in {"local", "hybrid"}:
+        p = _cache_path(hash_key)
+        if p.exists():
+            p.unlink()
+            deleted = True
+    if CACHE_BACKEND in {"dynamodb", "hybrid"}:
+        deleted = _ddb_delete_cache(hash_key) or deleted
+    if deleted:
+        return {"deleted": True}
+    raise HTTPException(404, "Not found")
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8080)), reload=True)

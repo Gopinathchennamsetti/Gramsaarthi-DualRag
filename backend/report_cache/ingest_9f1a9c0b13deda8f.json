@@ -1,0 +1,16 @@
+{
+  "interaction_id": "706fdd37-2938-4d3c-ae8e-a857951bd15a",
+  "index_name": "citizen_faq_index",
+  "status": "success",
+  "results": [
+    {
+      "document_id": "doc-11ea659a",
+      "document_name": "IntelliDoc.pdf",
+      "status": "success",
+      "chunks_created": 28,
+      "chunks_inserted": 28,
+      "validation_passed": true
+    }
+  ],
+  "hash_key": "9f1a9c0b13deda8f"
+}

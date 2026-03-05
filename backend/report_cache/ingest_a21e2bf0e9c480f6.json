@@ -1,0 +1,16 @@
+{
+  "interaction_id": "ed3d73bb-63ea-478d-b7ab-51fce44d5b14",
+  "index_name": "schemes_index",
+  "status": "success",
+  "results": [
+    {
+      "document_id": "doc-32b31b04",
+      "document_name": "ayushman_bharat.pdf",
+      "status": "success",
+      "chunks_created": 232,
+      "chunks_inserted": 232,
+      "validation_passed": true
+    }
+  ],
+  "hash_key": "a21e2bf0e9c480f6"
+}
