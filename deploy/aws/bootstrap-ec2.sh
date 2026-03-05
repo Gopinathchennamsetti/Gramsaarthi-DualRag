@@ -11,7 +11,15 @@ if [[ -z "$REPO_URL" ]]; then
 fi
 
 sudo apt-get update -y
-sudo apt-get install -y python3.11 python3.11-venv python3-pip git nginx awscli
+sudo apt-get install -y python3 python3-venv python3-pip git nginx curl unzip
+
+# Install AWS CLI v2 if missing (Ubuntu 24.04 repo may not include awscli package).
+if ! command -v aws >/dev/null 2>&1; then
+  cd /tmp
+  curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip -q -o awscliv2.zip
+  sudo ./aws/install --update
+fi
 
 if [[ ! -d "$APP_DIR/.git" ]]; then
   sudo mkdir -p /opt
@@ -25,10 +33,14 @@ else
 fi
 
 cd "$APP_DIR"
-python3.11 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install -r backend/requirements.txt -r backend/requirements_pipeline.txt
+
+# Free-tier friendly install: avoid huge CUDA wheels and pip cache growth.
+export PIP_NO_CACHE_DIR=1
+pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio
+pip install --extra-index-url https://download.pytorch.org/whl/cpu -r backend/requirements.txt -r backend/requirements_pipeline.txt
 
 sudo cp deploy/aws/dualrag-backend.service /etc/systemd/system/dualrag-backend.service
 sudo cp deploy/aws/nginx-dualrag.conf /etc/nginx/sites-available/dualrag-backend
