@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // ── Config ────────────────────────────────────────────────────────────────────
 // Empty string = use Vite proxy (vite.config.js proxies /api → localhost:8080)
 // Change to "http://localhost:8080" if running frontend without Vite dev server
-const API = "";
+const API = "http://3.235.76.236";
+
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 const api = async (path, opts = {}) => {
