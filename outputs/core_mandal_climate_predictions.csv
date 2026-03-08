@@ -1,0 +1,622 @@
+District,Mandal,forecast_year,forecast_month,predicted_rainfall_mm,drought_probability,drought_probability_pct,predicted_drought_flag
+Bhadradri Kothagudem,Chandrugonda,2026,1,0.58,0.4288,42.9,NO_DROUGHT
+Bhadradri Kothagudem,Mulakalapalle,2026,1,0.27,0.4172,41.7,NO_DROUGHT
+Bhadradri Kothagudem,Burgampadu,2026,1,0.32,0.4101,41.0,NO_DROUGHT
+Bhadradri Kothagudem,Annapureddipalle,2026,1,0.18,0.4078,40.8,NO_DROUGHT
+Bhadradri Kothagudem,Dummugudem,2026,1,1.74,0.3966,39.7,NO_DROUGHT
+Nizamabad,Balkonda,2026,1,1.0,0.392,39.2,NO_DROUGHT
+Warangal,Duggondi,2026,1,1.17,0.3721,37.2,NO_DROUGHT
+Nizamabad,Mupkal,2026,1,0.68,0.3635,36.4,NO_DROUGHT
+Nagarkurnool,Tadoor,2026,1,0.87,0.3527,35.3,NO_DROUGHT
+Nizamabad,Varni,2026,1,0.31,0.3466,34.7,NO_DROUGHT
+Karimnagar,Karimnagar_Rural,2026,1,0.58,0.3435,34.4,NO_DROUGHT
+Narayanpet,Marikal,2026,1,0.9,0.3315,33.1,NO_DROUGHT
+Karimnagar,Ramadugu,2026,1,0.69,0.33,33.0,NO_DROUGHT
+Nagarkurnool,Bijinapalle,2026,1,0.58,0.3291,32.9,NO_DROUGHT
+Jagtial,Gollapalle,2026,1,0.64,0.3285,32.9,NO_DROUGHT
+Karimnagar,Gannervaram,2026,1,1.0,0.3279,32.8,NO_DROUGHT
+Kamareddy,Birkoor,2026,1,0.1,0.3269,32.7,NO_DROUGHT
+Nizamabad,Yergatla,2026,1,0.92,0.3264,32.6,NO_DROUGHT
+Narayanpet,Damaragidda,2026,1,0.4,0.3253,32.5,NO_DROUGHT
+Mulugu,Kannaigudem,2026,1,1.98,0.3246,32.5,NO_DROUGHT
+Rajanna Sircilla,Boinpalle,2026,1,0.69,0.3217,32.2,NO_DROUGHT
+Jagtial,Malial,2026,1,1.36,0.3198,32.0,NO_DROUGHT
+Narayanpet,Kosgi,2026,1,0.87,0.318,31.8,NO_DROUGHT
+Narayanpet,Utkoor,2026,1,0.62,0.3147,31.5,NO_DROUGHT
+Jogulamba Gadwal,Dharur,2026,1,0.05,0.3145,31.5,NO_DROUGHT
+Nizamabad,Kotgiri,2026,1,0.12,0.3142,31.4,NO_DROUGHT
+Nirmal,Soan,2026,1,1.01,0.3126,31.3,NO_DROUGHT
+Peddapalli,Sultanabad,2026,1,0.53,0.3118,31.2,NO_DROUGHT
+Bhadradri Kothagudem,Bhadrachalam,2026,1,0.55,0.3109,31.1,NO_DROUGHT
+Jagtial,Kodimial,2026,1,0.65,0.3084,30.8,NO_DROUGHT
+Khammam,Sathupalle,2026,1,0.15,0.3083,30.8,NO_DROUGHT
+Mancherial,Bhimaram,2026,1,0.49,0.3064,30.6,NO_DROUGHT
+Nirmal,Sarangapur,2026,1,1.31,0.3061,30.6,NO_DROUGHT
+Rajanna Sircilla,Chandurthi,2026,1,0.26,0.306,30.6,NO_DROUGHT
+Jogulamba Gadwal,Ghattu,2026,1,0.43,0.3053,30.5,NO_DROUGHT
+Peddapalli,Dharmaram,2026,1,0.41,0.3052,30.5,NO_DROUGHT
+Jayashankar,12,2026,1,0.91,0.3048,30.5,NO_DROUGHT
+Mahabubnagar,Mohammamdabad,2026,1,1.12,0.3042,30.4,NO_DROUGHT
+Jogulamba Gadwal,Kaloor_Timmanadoddi,2026,1,0.33,0.3035,30.3,NO_DROUGHT
+Jagtial,Jagityal_Rural,2026,1,0.36,0.3035,30.4,NO_DROUGHT
+Adilabad,19,2026,1,1.12,0.302,30.2,NO_DROUGHT
+Yadadri Bhuvanagiri,Atmakur_M,2026,1,0.58,0.3017,30.2,NO_DROUGHT
+Yadadri Bhuvanagiri,Rajapet,2026,1,0.96,0.3016,30.2,NO_DROUGHT
+Nizamabad,Chandur,2026,1,0.74,0.3013,30.1,NO_DROUGHT
+Kamareddy,Nasurullabad,2026,1,0.07,0.2995,30.0,NO_DROUGHT
+Mulugu,21,2026,1,5.72,0.2992,29.9,NO_DROUGHT
+Rangareddy,Farooqnagar,2026,1,0.73,0.2987,29.9,NO_DROUGHT
+Peddapalli,Julapalle,2026,1,1.54,0.2985,29.9,NO_DROUGHT
+Karimnagar,Shankarapatnam,2026,1,0.38,0.2978,29.8,NO_DROUGHT
+Narayanpet,Dhanwada,2026,1,0.52,0.2966,29.7,NO_DROUGHT
+Kamareddy,23,2026,1,0.76,0.2948,29.5,NO_DROUGHT
+Mahabubnagar,Addakal,2026,1,1.79,0.2937,29.4,NO_DROUGHT
+Nirmal,Laxmanchanda,2026,1,0.2,0.2934,29.3,NO_DROUGHT
+Bhadradri Kothagudem,Sujathanagar,2026,1,0.73,0.2931,29.3,NO_DROUGHT
+Mahabubnagar,Nawabpet,2026,1,1.17,0.2918,29.2,NO_DROUGHT
+Jagtial,19,2026,1,0.63,0.2915,29.1,NO_DROUGHT
+Nirmal,Tanur,2026,1,0.94,0.2915,29.1,NO_DROUGHT
+Karimnagar,Manakondur,2026,1,0.85,0.2912,29.1,NO_DROUGHT
+Nirmal,Pembi,2026,1,0.23,0.2903,29.0,NO_DROUGHT
+Nizamabad,32,2026,1,0.18,0.29,29.0,NO_DROUGHT
+Mahabubnagar,28,2026,1,0.5,0.2895,28.9,NO_DROUGHT
+Narayanpet,Maganoor,2026,1,0.59,0.2893,28.9,NO_DROUGHT
+Mulugu,Venkatapur,2026,1,1.82,0.2875,28.7,NO_DROUGHT
+Jagtial,20,2026,1,0.69,0.2874,28.7,NO_DROUGHT
+Nagarkurnool,Veldanda,2026,1,0.85,0.2867,28.7,NO_DROUGHT
+Adilabad,20,2026,1,3.45,0.2866,28.7,NO_DROUGHT
+Jagtial,Sarangapur,2026,1,0.29,0.2862,28.6,NO_DROUGHT
+Bhadradri Kothagudem,Tekulapalle,2026,1,0.67,0.285,28.5,NO_DROUGHT
+Bhadradri Kothagudem,Julurpad,2026,1,0.14,0.2846,28.5,NO_DROUGHT
+Karimnagar,Karimnagar,2026,1,1.05,0.2845,28.4,NO_DROUGHT
+Peddapalli,Peddapalle,2026,1,0.39,0.2842,28.4,NO_DROUGHT
+Jogulamba Gadwal,13,2026,1,3.82,0.2842,28.4,NO_DROUGHT
+Kamareddy,Pedda Kodapgal,2026,1,0.21,0.2841,28.4,NO_DROUGHT
+Bhadradri Kothagudem,Dammapeta,2026,1,1.1,0.2841,28.4,NO_DROUGHT
+Nagarkurnool,Pentlavelli,2026,1,0.42,0.284,28.4,NO_DROUGHT
+Jangaon,Ganpur_Stn,2026,1,0.47,0.2839,28.4,NO_DROUGHT
+Siddipet,Dhoolmitta,2026,1,0.55,0.2835,28.4,NO_DROUGHT
+Narayanpet,Narayanpet,2026,1,0.7,0.2835,28.4,NO_DROUGHT
+Medak,Chegunta,2026,1,0.87,0.2831,28.3,NO_DROUGHT
+Kamareddy,24,2026,1,0.47,0.2828,28.3,NO_DROUGHT
+Vikarabad,Kulkacharla,2026,1,1.02,0.2827,28.3,NO_DROUGHT
+Kamareddy,25,2026,1,0.08,0.2823,28.2,NO_DROUGHT
+Jagtial,Mallapur,2026,1,0.28,0.2823,28.2,NO_DROUGHT
+Jagtial,Jagtial,2026,1,0.24,0.2819,28.2,NO_DROUGHT
+Nagarkurnool,Kalwakurthy,2026,1,0.44,0.2814,28.1,NO_DROUGHT
+Karimnagar,Choppadandi,2026,1,0.76,0.281,28.1,NO_DROUGHT
+Nizamabad,33,2026,1,1.48,0.2807,28.1,NO_DROUGHT
+Nirmal,Kaddampeddur,2026,1,0.89,0.2806,28.1,NO_DROUGHT
+Khammam,Wyra,2026,1,0.14,0.2797,28.0,NO_DROUGHT
+Siddipet,Doultabad,2026,1,0.82,0.2796,28.0,NO_DROUGHT
+Kumuram Bheem,Lingapur,2026,1,0.67,0.2789,27.9,NO_DROUGHT
+Kumuram Bheem,Chintalamanepally,2026,1,0.42,0.2788,27.9,NO_DROUGHT
+Vikarabad,Doulatabad,2026,1,0.52,0.2786,27.9,NO_DROUGHT
+Adilabad,21,2026,1,0.9,0.2785,27.8,NO_DROUGHT
+Khammam,Bonakal,2026,1,0.13,0.2777,27.8,NO_DROUGHT
+Wanaparthy,Pangal,2026,1,1.48,0.2776,27.8,NO_DROUGHT
+Warangal,Chennaraopeta,2026,1,0.38,0.2775,27.8,NO_DROUGHT
+Nizamabad,Mortad,2026,1,0.4,0.2769,27.7,NO_DROUGHT
+Nizamabad,Mugpal,2026,1,0.14,0.2767,27.7,NO_DROUGHT
+Bhadradri Kothagudem,Cherla,2026,1,0.66,0.2765,27.7,NO_DROUGHT
+Nagarkurnool,Urkonda,2026,1,0.85,0.2764,27.6,NO_DROUGHT
+Peddapalli,Antargoan,2026,1,0.3,0.2762,27.6,NO_DROUGHT
+Nirmal,Dilawarpur,2026,1,0.7,0.2762,27.6,NO_DROUGHT
+Vikarabad,Kodangal,2026,1,0.57,0.276,27.6,NO_DROUGHT
+Vikarabad,20,2026,1,0.4,0.2759,27.6,NO_DROUGHT
+Siddipet,Siddipet_Rural,2026,1,0.37,0.2757,27.6,NO_DROUGHT
+Nizamabad,Rudrur,2026,1,0.11,0.2756,27.6,NO_DROUGHT
+Jayashankar,Malharrao,2026,1,0.73,0.2756,27.6,NO_DROUGHT
+Siddipet,Maddur,2026,1,1.34,0.2755,27.5,NO_DROUGHT
+Mahabubnagar,Midjil,2026,1,0.4,0.2754,27.5,NO_DROUGHT
+Peddapalli,Manthani,2026,1,0.85,0.274,27.4,NO_DROUGHT
+Jayashankar,Palmela,2026,1,1.83,0.2735,27.4,NO_DROUGHT
+Khammam,Enkuru,2026,1,0.1,0.2732,27.3,NO_DROUGHT
+Nizamabad,Nizamabad_North,2026,1,0.19,0.2731,27.3,NO_DROUGHT
+Kumuram Bheem,Bejjur,2026,1,0.25,0.2731,27.3,NO_DROUGHT
+Nizamabad,Bodhan,2026,1,0.04,0.2729,27.3,NO_DROUGHT
+Nagarkurnool,Nagar_Kurnool,2026,1,0.28,0.2723,27.2,NO_DROUGHT
+Narayanpet,Makthal,2026,1,0.73,0.2716,27.2,NO_DROUGHT
+Narayanpet,15,2026,1,0.32,0.2713,27.1,NO_DROUGHT
+Narayanpet,Narva,2026,1,0.32,0.2712,27.1,NO_DROUGHT
+Bhadradri Kothagudem,Palawancha,2026,1,0.19,0.2709,27.1,NO_DROUGHT
+Mahabubnagar,Hanwada,2026,1,1.27,0.2707,27.1,NO_DROUGHT
+Mahabubnagar,Chinna_Chintha_Kunta,2026,1,0.76,0.2703,27.0,NO_DROUGHT
+Wanaparthy,Amarchinta,2026,1,0.23,0.2701,27.0,NO_DROUGHT
+Mahabubnagar,Musapet,2026,1,0.64,0.2701,27.0,NO_DROUGHT
+Jayashankar,Kataram,2026,1,0.73,0.2699,27.0,NO_DROUGHT
+Mahabubnagar,Mahabubnagar_Rural,2026,1,0.91,0.2694,26.9,NO_DROUGHT
+Kamareddy,Banswada,2026,1,0.5,0.2686,26.9,NO_DROUGHT
+Rangareddy,Manchal,2026,1,0.75,0.2686,26.9,NO_DROUGHT
+Nizamabad,Nizamabad_Rural,2026,1,0.6,0.2679,26.8,NO_DROUGHT
+Mahabubabad,Gudur,2026,1,1.21,0.2673,26.7,NO_DROUGHT
+Khammam,Penuballi,2026,1,0.13,0.2671,26.7,NO_DROUGHT
+Medak,Masaipet,2026,1,0.62,0.2665,26.7,NO_DROUGHT
+Kamareddy,Nizamsagar,2026,1,0.96,0.2662,26.6,NO_DROUGHT
+Khammam,Chinthakani,2026,1,0.14,0.2657,26.6,NO_DROUGHT
+Kumuram Bheem,Tiryani,2026,1,0.28,0.2657,26.6,NO_DROUGHT
+Kumuram Bheem,Wankdi,2026,1,0.44,0.2656,26.6,NO_DROUGHT
+Jagtial,Metpalle,2026,1,0.59,0.2656,26.6,NO_DROUGHT
+Karimnagar,Kothapalle,2026,1,0.22,0.2655,26.6,NO_DROUGHT
+Suryapet,Chilkur,2026,1,0.46,0.2651,26.5,NO_DROUGHT
+Adilabad,Boath,2026,1,0.96,0.2649,26.5,NO_DROUGHT
+Adilabad,Neradigonda,2026,1,0.2,0.2647,26.5,NO_DROUGHT
+Sangareddy,Kalher,2026,1,1.57,0.2647,26.5,NO_DROUGHT
+Mancherial,Hajipur,2026,1,0.49,0.264,26.4,NO_DROUGHT
+Mancherial,Naspur,2026,1,0.44,0.2639,26.4,NO_DROUGHT
+Bhadradri Kothagudem,Pinapaka,2026,1,0.24,0.2638,26.4,NO_DROUGHT
+Narayanpet,Krishna,2026,1,2.1,0.2638,26.4,NO_DROUGHT
+Khammam,Kalluru,2026,1,0.14,0.2637,26.4,NO_DROUGHT
+Khammam,Thallada,2026,1,0.14,0.2637,26.4,NO_DROUGHT
+Siddipet,Nanganur,2026,1,0.58,0.2637,26.4,NO_DROUGHT
+Kamareddy,Madnur,2026,1,0.19,0.2636,26.4,NO_DROUGHT
+Jogulamba Gadwal,Maldakal,2026,1,0.27,0.2636,26.4,NO_DROUGHT
+Nirmal,Mamda,2026,1,1.05,0.2636,26.4,NO_DROUGHT
+Kamareddy,Bibipet,2026,1,0.06,0.2635,26.4,NO_DROUGHT
+Narayanpet,14,2026,1,0.52,0.2627,26.3,NO_DROUGHT
+Khammam,Yerrupalem,2026,1,0.18,0.2626,26.3,NO_DROUGHT
+Kamareddy,Gandhari,2026,1,0.32,0.2622,26.2,NO_DROUGHT
+Jagtial,Kathlapur,2026,1,0.48,0.2618,26.2,NO_DROUGHT
+Khammam,Madhira,2026,1,0.19,0.2616,26.2,NO_DROUGHT
+Rangareddy,Kothur,2026,1,2.54,0.2613,26.1,NO_DROUGHT
+Bhadradri Kothagudem,Kothagudem,2026,1,0.17,0.2605,26.1,NO_DROUGHT
+Wanaparthy,15,2026,1,4.97,0.26,26.0,NO_DROUGHT
+Nagarkurnool,Uppunuthala,2026,1,0.34,0.2599,26.0,NO_DROUGHT
+Vikarabad,Doma,2026,1,0.83,0.2599,26.0,NO_DROUGHT
+Khammam,Konijerla,2026,1,0.14,0.2593,25.9,NO_DROUGHT
+Medchal-Malkajgiri,Malkajgiri,2026,1,0.39,0.259,25.9,NO_DROUGHT
+Nagarkurnool,Vangoor,2026,1,0.59,0.2589,25.9,NO_DROUGHT
+Mancherial,Luxettipet,2026,1,0.19,0.2587,25.9,NO_DROUGHT
+Nagarkurnool,Balmoor,2026,1,0.22,0.2577,25.8,NO_DROUGHT
+Jagtial,Medipalle,2026,1,0.22,0.2572,25.7,NO_DROUGHT
+Bhadradri Kothagudem,Manuguru,2026,1,0.23,0.2571,25.7,NO_DROUGHT
+Nagarkurnool,Telkapalle,2026,1,0.27,0.2568,25.7,NO_DROUGHT
+Karimnagar,Jammikunta,2026,1,0.4,0.2568,25.7,NO_DROUGHT
+Kamareddy,Sadasivanagar,2026,1,0.55,0.2566,25.7,NO_DROUGHT
+Nirmal,Kuntala,2026,1,0.33,0.2564,25.6,NO_DROUGHT
+Mahabubnagar,Devarkadara,2026,1,1.03,0.2557,25.6,NO_DROUGHT
+Bhadradri Kothagudem,Laxmidevipalli,2026,1,0.16,0.255,25.5,NO_DROUGHT
+Warangal,Khanapur,2026,1,0.84,0.2549,25.5,NO_DROUGHT
+Kamareddy,Bichkunda,2026,1,0.28,0.2548,25.5,NO_DROUGHT
+Siddipet,Gajwel,2026,1,0.11,0.2546,25.5,NO_DROUGHT
+Kamareddy,Jukkal,2026,1,0.12,0.2545,25.4,NO_DROUGHT
+Nagarkurnool,Achampet,2026,1,0.82,0.2545,25.4,NO_DROUGHT
+Nizamabad,Mendora,2026,1,0.2,0.2541,25.4,NO_DROUGHT
+Nirmal,Dastuarabad,2026,1,0.24,0.2541,25.4,NO_DROUGHT
+Rangareddy,Nandigam,2026,1,3.21,0.2538,25.4,NO_DROUGHT
+Rajanna Sircilla,Vemulawada,2026,1,0.47,0.2536,25.4,NO_DROUGHT
+Nizamabad,Bheemgal,2026,1,0.7,0.2533,25.3,NO_DROUGHT
+Kumuram Bheem,Kagaznagar,2026,1,0.2,0.253,25.3,NO_DROUGHT
+Kamareddy,Kamareddy,2026,1,0.25,0.2523,25.2,NO_DROUGHT
+Medchal-Malkajgiri,Medipally,2026,1,0.76,0.252,25.2,NO_DROUGHT
+Sangareddy,Jinnaram,2026,1,0.91,0.2518,25.2,NO_DROUGHT
+Medchal-Malkajgiri,Muduchinthalapally,2026,1,0.96,0.2514,25.1,NO_DROUGHT
+Rajanna Sircilla,Yellareddypeta,2026,1,0.25,0.2513,25.1,NO_DROUGHT
+Hanumakonda,Khazipet,2026,1,0.7,0.2507,25.1,NO_DROUGHT
+Jangaon,Narmetta,2026,1,0.58,0.2503,25.0,NO_DROUGHT
+Medchal-Malkajgiri,Quthbullapur,2026,1,0.7,0.2502,25.0,NO_DROUGHT
+Karimnagar,V_Saidapur,2026,1,0.53,0.25,25.0,NO_DROUGHT
+Siddipet,26,2026,1,0.53,0.2499,25.0,NO_DROUGHT
+Siddipet,Markook,2026,1,0.18,0.2498,25.0,NO_DROUGHT
+Rangareddy,Shabad,2026,1,1.32,0.2497,25.0,NO_DROUGHT
+Nalgonda,Kethepalle,2026,1,1.12,0.2494,24.9,NO_DROUGHT
+Mahabubnagar,Gandeed,2026,1,1.47,0.2493,24.9,NO_DROUGHT
+Nirmal,Nirmal_Rural,2026,1,0.52,0.249,24.9,NO_DROUGHT
+Vikarabad,Pargi,2026,1,0.79,0.249,24.9,NO_DROUGHT
+Kamareddy,Rajampet,2026,1,0.35,0.2487,24.9,NO_DROUGHT
+Nizamabad,Armur,2026,1,0.2,0.2484,24.8,NO_DROUGHT
+Jangaon,Jangaon,2026,1,0.49,0.2484,24.8,NO_DROUGHT
+Suryapet,Atmakur_S,2026,1,0.37,0.2483,24.8,NO_DROUGHT
+Jagtial,Velgatoor,2026,1,0.53,0.2483,24.8,NO_DROUGHT
+Kamareddy,Machareddy,2026,1,2.35,0.2483,24.8,NO_DROUGHT
+Peddapalli,Palakurthy,2026,1,0.35,0.248,24.8,NO_DROUGHT
+Jagtial,Buggaram,2026,1,0.42,0.2476,24.8,NO_DROUGHT
+Yadadri Bhuvanagiri,Alair,2026,1,0.22,0.2473,24.7,NO_DROUGHT
+Nizamabad,Makloor,2026,1,0.19,0.2469,24.7,NO_DROUGHT
+Nagarkurnool,Lingal,2026,1,0.52,0.2468,24.7,NO_DROUGHT
+Sangareddy,Ameenapur,2026,1,0.36,0.2467,24.7,NO_DROUGHT
+Jayashankar,Bhupalpalle,2026,1,1.22,0.2467,24.7,NO_DROUGHT
+Yadadri Bhuvanagiri,Bommalaramaram,2026,1,0.74,0.2462,24.6,NO_DROUGHT
+Nirmal,Basar,2026,1,0.18,0.2459,24.6,NO_DROUGHT
+Kamareddy,Pitlam,2026,1,0.28,0.2455,24.5,NO_DROUGHT
+Vikarabad,Chowdapur,2026,1,2.06,0.2454,24.5,NO_DROUGHT
+Khammam,Vemsoor,2026,1,0.36,0.2453,24.5,NO_DROUGHT
+Medak,Yeldurthy,2026,1,0.34,0.2452,24.5,NO_DROUGHT
+Vikarabad,Bomraspeta,2026,1,0.82,0.2452,24.5,NO_DROUGHT
+Narayanpet,Maddur,2026,1,0.98,0.2452,24.5,NO_DROUGHT
+Karimnagar,Thimmapur,2026,1,0.45,0.2445,24.5,NO_DROUGHT
+Bhadradri Kothagudem,Aswapuram,2026,1,0.36,0.2444,24.4,NO_DROUGHT
+Kumuram Bheem,Kerameri,2026,1,0.59,0.2443,24.4,NO_DROUGHT
+Siddipet,25,2026,1,0.05,0.2441,24.4,NO_DROUGHT
+Rajanna Sircilla,Vemulawada_Rural,2026,1,0.42,0.2437,24.4,NO_DROUGHT
+Wanaparthy,Wanaparthy,2026,1,0.93,0.2437,24.4,NO_DROUGHT
+Jayashankar,Mogullapalle,2026,1,0.65,0.2435,24.4,NO_DROUGHT
+Adilabad,Talamadugu,2026,1,0.51,0.2434,24.3,NO_DROUGHT
+Khammam,Mudigonda,2026,1,0.17,0.2432,24.3,NO_DROUGHT
+Siddipet,Koheda,2026,1,0.4,0.243,24.3,NO_DROUGHT
+Khammam,Raghunadhapalem,2026,1,0.17,0.2427,24.3,NO_DROUGHT
+Nizamabad,Yeda_Palle,2026,1,0.17,0.2423,24.2,NO_DROUGHT
+Siddipet,Thoguta,2026,1,0.32,0.2422,24.2,NO_DROUGHT
+Kumuram Bheem,Asifabad,2026,1,0.65,0.242,24.2,NO_DROUGHT
+Nizamabad,31,2026,1,0.2,0.2418,24.2,NO_DROUGHT
+Yadadri Bhuvanagiri,Mothkur,2026,1,0.4,0.2414,24.1,NO_DROUGHT
+Siddipet,Wargal,2026,1,1.86,0.2414,24.1,NO_DROUGHT
+Siddipet,Mulug,2026,1,0.87,0.2411,24.1,NO_DROUGHT
+Medak,Narsingi,2026,1,0.44,0.241,24.1,NO_DROUGHT
+Siddipet,Cheriyal,2026,1,0.64,0.2405,24.1,NO_DROUGHT
+Jagtial,Dharmapuri,2026,1,0.41,0.2404,24.0,NO_DROUGHT
+Nizamabad,Ranjal,2026,1,0.17,0.2399,24.0,NO_DROUGHT
+Rangareddy,Kandukur,2026,1,0.47,0.2398,24.0,NO_DROUGHT
+Jagtial,Beerpur,2026,1,0.26,0.2388,23.9,NO_DROUGHT
+Hyderabad,Secunderabad,2026,1,0.82,0.2387,23.9,NO_DROUGHT
+Nizamabad,Nizamabad_South,2026,1,0.3,0.2385,23.8,NO_DROUGHT
+Kumuram Bheem,Kouthala,2026,1,0.37,0.2384,23.8,NO_DROUGHT
+Sangareddy,Patancheruvu,2026,1,0.24,0.2383,23.8,NO_DROUGHT
+Vikarabad,Basheerabad,2026,1,0.17,0.238,23.8,NO_DROUGHT
+Kamareddy,Ramareddy,2026,1,0.49,0.2376,23.8,NO_DROUGHT
+Bhadradri Kothagudem,Chunchupally,2026,1,0.66,0.2376,23.8,NO_DROUGHT
+Siddipet,Kondapak,2026,1,0.23,0.2375,23.8,NO_DROUGHT
+Mancherial,Dandepalle,2026,1,0.38,0.2375,23.8,NO_DROUGHT
+Rangareddy,Abdullapurmet,2026,1,0.26,0.2374,23.7,NO_DROUGHT
+Jogulamba Gadwal,Undavelli,2026,1,0.42,0.2373,23.7,NO_DROUGHT
+Karimnagar,Gangadhara,2026,1,0.51,0.2371,23.7,NO_DROUGHT
+Siddipet,Dubbak,2026,1,0.12,0.2368,23.7,NO_DROUGHT
+Hyderabad,Musheerabad,2026,1,0.86,0.2367,23.7,NO_DROUGHT
+Rajanna Sircilla,Sirsilla,2026,1,0.41,0.2366,23.7,NO_DROUGHT
+Medchal-Malkajgiri,Kapra,2026,1,0.44,0.2366,23.7,NO_DROUGHT
+Kumuram Bheem,Sirpur_U,2026,1,0.6,0.2366,23.7,NO_DROUGHT
+Kumuram Bheem,Rebbana,2026,1,0.22,0.2364,23.6,NO_DROUGHT
+Hyderabad,Amberpet,2026,1,0.47,0.236,23.6,NO_DROUGHT
+Sangareddy,Kandi,2026,1,0.91,0.236,23.6,NO_DROUGHT
+Wanaparthy,Ghanpur,2026,1,1.25,0.236,23.6,NO_DROUGHT
+Medak,Kowdipalle,2026,1,0.31,0.2358,23.6,NO_DROUGHT
+Mahabubabad,Mahabubabad,2026,1,0.28,0.2356,23.6,NO_DROUGHT
+Hyderabad,Himayatnagar,2026,1,0.58,0.2355,23.5,NO_DROUGHT
+Mahabubabad,Garla,2026,1,0.46,0.2354,23.5,NO_DROUGHT
+Medak,Shankarampet_A,2026,1,0.26,0.2353,23.5,NO_DROUGHT
+Sangareddy,Sirgapoor,2026,1,0.26,0.2353,23.5,NO_DROUGHT
+Bhadradri Kothagudem,Aswaraopeta,2026,1,0.48,0.2349,23.5,NO_DROUGHT
+Vikarabad,Pudur,2026,1,1.23,0.2348,23.5,NO_DROUGHT
+Medchal-Malkajgiri,Dundigal_Gandimaisamma,2026,1,0.86,0.2346,23.5,NO_DROUGHT
+Rangareddy,Rajendranagar,2026,1,1.73,0.2346,23.5,NO_DROUGHT
+Jogulamba Gadwal,Aiza,2026,1,0.09,0.2345,23.5,NO_DROUGHT
+Siddipet,Mirdoddi,2026,1,0.09,0.2344,23.4,NO_DROUGHT
+Khammam,Khammam_Urban,2026,1,0.21,0.2339,23.4,NO_DROUGHT
+Medchal-Malkajgiri,Balanagar,2026,1,0.75,0.2337,23.4,NO_DROUGHT
+Jogulamba Gadwal,Manopad,2026,1,0.22,0.2333,23.3,NO_DROUGHT
+Medak,Kulcharam,2026,1,0.3,0.2333,23.3,NO_DROUGHT
+Hyderabad,Khairatabad,2026,1,0.8,0.2333,23.3,NO_DROUGHT
+Rajanna Sircilla,Ellanthakunta,2026,1,1.2,0.2332,23.3,NO_DROUGHT
+Nizamabad,Dichpalle,2026,1,0.16,0.2331,23.3,NO_DROUGHT
+Siddipet,Siddipet_Urban,2026,1,0.55,0.2329,23.3,NO_DROUGHT
+Suryapet,Garidepalle,2026,1,0.26,0.2327,23.3,NO_DROUGHT
+Sangareddy,Gummadidala,2026,1,1.06,0.2327,23.3,NO_DROUGHT
+Khammam,Khammam_Rural,2026,1,0.17,0.2323,23.2,NO_DROUGHT
+Hyderabad,Shaikpet,2026,1,0.56,0.2322,23.2,NO_DROUGHT
+Jagtial,Ibrahimpatnam,2026,1,0.4,0.2321,23.2,NO_DROUGHT
+Vikarabad,Peddemul,2026,1,0.89,0.2316,23.2,NO_DROUGHT
+Adilabad,Bheempoor,2026,1,0.54,0.2315,23.1,NO_DROUGHT
+Adilabad,Gudihathnur,2026,1,0.98,0.2315,23.1,NO_DROUGHT
+Jogulamba Gadwal,Gadwal,2026,1,0.37,0.2309,23.1,NO_DROUGHT
+Adilabad,Gadiguda,2026,1,0.73,0.2308,23.1,NO_DROUGHT
+Yadadri Bhuvanagiri,Turkapalle_M,2026,1,0.82,0.2308,23.1,NO_DROUGHT
+Vikarabad,Kotepally,2026,1,0.88,0.2304,23.0,NO_DROUGHT
+Kumuram Bheem,Sirpur_T,2026,1,0.36,0.2303,23.0,NO_DROUGHT
+Mancherial,Jannaram,2026,1,0.29,0.2302,23.0,NO_DROUGHT
+Mancherial,Kannepalli,2026,1,0.48,0.23,23.0,NO_DROUGHT
+Warangal,Warangal,2026,1,0.62,0.23,23.0,NO_DROUGHT
+Peddapalli,Elgaid,2026,1,1.43,0.23,23.0,NO_DROUGHT
+Rangareddy,Gandipet,2026,1,0.46,0.2299,23.0,NO_DROUGHT
+Nalgonda,33,2026,1,0.86,0.2299,23.0,NO_DROUGHT
+Kamareddy,Naga_Reddipet,2026,1,0.23,0.2298,23.0,NO_DROUGHT
+Jagtial,Raikal,2026,1,0.79,0.2298,23.0,NO_DROUGHT
+Medchal-Malkajgiri,Ghatkesar,2026,1,0.29,0.2296,23.0,NO_DROUGHT
+Kamareddy,Yellareddy,2026,1,0.27,0.2292,22.9,NO_DROUGHT
+Siddipet,Bejjanki,2026,1,0.22,0.229,22.9,NO_DROUGHT
+Mulugu,Mulug,2026,1,2.01,0.229,22.9,NO_DROUGHT
+Wanaparthy,Gopalpeta,2026,1,0.45,0.2289,22.9,NO_DROUGHT
+Yadadri Bhuvanagiri,Pochampalle,2026,1,0.48,0.2288,22.9,NO_DROUGHT
+Nizamabad,Indalwai,2026,1,0.11,0.2283,22.8,NO_DROUGHT
+Adilabad,Utnur,2026,1,0.7,0.2283,22.8,NO_DROUGHT
+Sangareddy,Kangti,2026,1,0.48,0.228,22.8,NO_DROUGHT
+Medchal-Malkajgiri,Uppal,2026,1,0.37,0.2279,22.8,NO_DROUGHT
+Nagarkurnool,Kollapur,2026,1,0.35,0.2278,22.8,NO_DROUGHT
+Sangareddy,Ramachandrapuram,2026,1,0.47,0.2275,22.7,NO_DROUGHT
+Medchal-Malkajgiri,Kukatpally,2026,1,0.45,0.227,22.7,NO_DROUGHT
+Rajanna Sircilla,Thangallapalle,2026,1,0.39,0.2269,22.7,NO_DROUGHT
+Medak,Alladurg,2026,1,0.47,0.2263,22.6,NO_DROUGHT
+Nirmal,Kubeer,2026,1,0.24,0.226,22.6,NO_DROUGHT
+Mahabubabad,Bayyaram,2026,1,0.35,0.226,22.6,NO_DROUGHT
+Wanaparthy,Peddamandadi,2026,1,1.0,0.226,22.6,NO_DROUGHT
+Vikarabad,Vikarabad,2026,1,0.64,0.2258,22.6,NO_DROUGHT
+Khammam,Kamepalle,2026,1,0.29,0.2256,22.6,NO_DROUGHT
+Karimnagar,Chigurumamidi,2026,1,0.63,0.2255,22.6,NO_DROUGHT
+Sangareddy,28,2026,1,0.16,0.2254,22.5,NO_DROUGHT
+Nizamabad,Vailpur,2026,1,0.43,0.2252,22.5,NO_DROUGHT
+Sangareddy,Naykal,2026,1,0.82,0.2252,22.5,NO_DROUGHT
+Khammam,Singareni,2026,1,0.16,0.2249,22.5,NO_DROUGHT
+Suryapet,Ananthagiri,2026,1,0.42,0.2245,22.4,NO_DROUGHT
+Jangaon,Bachannapeta,2026,1,0.79,0.2245,22.5,NO_DROUGHT
+Hyderabad,Tirumalgiri,2026,1,0.94,0.2245,22.4,NO_DROUGHT
+Peddapalli,Ramagundam,2026,1,0.16,0.2241,22.4,NO_DROUGHT
+Hanumakonda,Inole,2026,1,0.57,0.2241,22.4,NO_DROUGHT
+Suryapet,Nadigudem,2026,1,0.13,0.224,22.4,NO_DROUGHT
+Wanaparthy,Srirangapur,2026,1,1.04,0.2236,22.4,NO_DROUGHT
+Adilabad,Adilabad Urban,2026,1,0.22,0.2235,22.4,NO_DROUGHT
+Sangareddy,Kohir,2026,1,0.65,0.2235,22.4,NO_DROUGHT
+Kumuram Bheem,Jainoor,2026,1,0.63,0.2232,22.3,NO_DROUGHT
+Rajanna Sircilla,Rudrangi,2026,1,0.44,0.2231,22.3,NO_DROUGHT
+Nizamabad,Nandipet,2026,1,0.32,0.2227,22.3,NO_DROUGHT
+Hyderabad,Maredpally,2026,1,0.82,0.2227,22.3,NO_DROUGHT
+Mahabubnagar,Koilkonda,2026,1,0.97,0.2227,22.3,NO_DROUGHT
+Peddapalli,Ramagiri,2026,1,0.49,0.2225,22.2,NO_DROUGHT
+Jayashankar,Regonda,2026,1,0.59,0.2225,22.2,NO_DROUGHT
+Medchal-Malkajgiri,Keesara,2026,1,0.42,0.2224,22.2,NO_DROUGHT
+Medak,Tekmal,2026,1,0.23,0.2219,22.2,NO_DROUGHT
+Sangareddy,Kondapur,2026,1,0.25,0.2218,22.2,NO_DROUGHT
+Kumuram Bheem,Penchikalpet,2026,1,0.29,0.2217,22.2,NO_DROUGHT
+Kamareddy,Lingampet,2026,1,0.39,0.2216,22.2,NO_DROUGHT
+Jagtial,Koratla,2026,1,0.23,0.2212,22.1,NO_DROUGHT
+Medak,Papannapet,2026,1,0.3,0.2212,22.1,NO_DROUGHT
+Sangareddy,Zahirabad,2026,1,1.28,0.221,22.1,NO_DROUGHT
+Karimnagar,Ellandakunta,2026,1,0.73,0.2209,22.1,NO_DROUGHT
+Nirmal,Bhainsa,2026,1,0.19,0.2207,22.1,NO_DROUGHT
+Medak,Shivampet,2026,1,0.39,0.2204,22.0,NO_DROUGHT
+Medak,Chilipched,2026,1,0.18,0.2201,22.0,NO_DROUGHT
+Rangareddy,Moinabad,2026,1,0.45,0.2199,22.0,NO_DROUGHT
+Adilabad,Narnoor,2026,1,0.65,0.2197,22.0,NO_DROUGHT
+Yadadri Bhuvanagiri,Bibinagar,2026,1,0.96,0.2196,22.0,NO_DROUGHT
+Nizamabad,Navipet,2026,1,0.55,0.2195,21.9,NO_DROUGHT
+Sangareddy,Narayankhed,2026,1,0.6,0.2195,21.9,NO_DROUGHT
+Medak,Narsapur,2026,1,0.24,0.2194,21.9,NO_DROUGHT
+Rangareddy,Madgul,2026,1,0.77,0.2192,21.9,NO_DROUGHT
+Mahabubnagar,Bhoothpur,2026,1,0.31,0.2191,21.9,NO_DROUGHT
+Mancherial,Chennur,2026,1,1.0,0.2191,21.9,NO_DROUGHT
+Hyderabad,Ameerpet,2026,1,0.73,0.2186,21.9,NO_DROUGHT
+Nalgonda,Nampalle,2026,1,0.47,0.2183,21.8,NO_DROUGHT
+Medchal-Malkajgiri,Alwal,2026,1,0.65,0.2182,21.8,NO_DROUGHT
+Rajanna Sircilla,Veernapalle,2026,1,0.28,0.2176,21.8,NO_DROUGHT
+Nalgonda,Thripuraram,2026,1,0.16,0.2173,21.7,NO_DROUGHT
+Mancherial,Kasipet,2026,1,0.65,0.2173,21.7,NO_DROUGHT
+Jayashankar,Chityal,2026,1,0.51,0.2171,21.7,NO_DROUGHT
+Nirmal,Khanpur,2026,1,0.68,0.2171,21.7,NO_DROUGHT
+Nizamabad,Jakranpalle,2026,1,0.69,0.2164,21.6,NO_DROUGHT
+Rangareddy,Kadthal,2026,1,0.99,0.2164,21.6,NO_DROUGHT
+Sangareddy,Chowtakur,2026,1,0.28,0.2163,21.6,NO_DROUGHT
+Vikarabad,Dharur,2026,1,0.86,0.2163,21.6,NO_DROUGHT
+Hanumakonda,Elkathurthi,2026,1,0.21,0.2161,21.6,NO_DROUGHT
+Mancherial,Jaipur,2026,1,0.14,0.216,21.6,NO_DROUGHT
+Suryapet,Chinthala Palem,2026,1,0.66,0.2159,21.6,NO_DROUGHT
+Nagarkurnool,Amrabad,2026,1,0.27,0.2157,21.6,NO_DROUGHT
+Rangareddy,Ibrahimpatnam,2026,1,0.48,0.2157,21.6,NO_DROUGHT
+Adilabad,Sirikonda,2026,1,0.51,0.2157,21.6,NO_DROUGHT
+Mahabubabad,Kesamudram,2026,1,0.62,0.2157,21.6,NO_DROUGHT
+Nirmal,Narsapur_G,2026,1,0.69,0.2157,21.6,NO_DROUGHT
+Mahabubnagar,Rajapur,2026,1,1.06,0.2156,21.6,NO_DROUGHT
+Hyderabad,Bahadurpura,2026,1,2.46,0.2155,21.5,NO_DROUGHT
+Jayashankar,Mutharam_Mahadevpur,2026,1,0.2,0.2152,21.5,NO_DROUGHT
+Medak,Shankarampet_R,2026,1,2.53,0.2152,21.5,NO_DROUGHT
+Rangareddy,Saroornagar,2026,1,0.61,0.215,21.5,NO_DROUGHT
+Rajanna Sircilla,Gambhiraopeta,2026,1,0.86,0.2149,21.5,NO_DROUGHT
+Sangareddy,Andhole,2026,1,1.71,0.2148,21.5,NO_DROUGHT
+Jayashankar,Ghanapur_Mulug,2026,1,2.21,0.2146,21.5,NO_DROUGHT
+Karimnagar,Veenavanka,2026,1,1.0,0.2143,21.4,NO_DROUGHT
+Jangaon,Raghunathpalle,2026,1,0.97,0.2142,21.4,NO_DROUGHT
+Rangareddy,Serilingampally,2026,1,0.39,0.214,21.4,NO_DROUGHT
+Nagarkurnool,Peddakothapalle,2026,1,0.75,0.2139,21.4,NO_DROUGHT
+Suryapet,Mothey,2026,1,0.43,0.2138,21.4,NO_DROUGHT
+Wanaparthy,Pebbair,2026,1,2.15,0.2138,21.4,NO_DROUGHT
+Suryapet,Noothankal,2026,1,0.17,0.2136,21.4,NO_DROUGHT
+Mahabubnagar,Mahabubnagar_Urban,2026,1,0.94,0.2135,21.4,NO_DROUGHT
+Medak,Nizampet,2026,1,0.75,0.2134,21.3,NO_DROUGHT
+Siddipet,Anthakkapeta,2026,1,0.22,0.2132,21.3,NO_DROUGHT
+Mahabubabad,Narsimhulapet,2026,1,0.51,0.213,21.3,NO_DROUGHT
+Rangareddy,Yacharam,2026,1,0.71,0.2127,21.3,NO_DROUGHT
+Bhadradri Kothagudem,Karakagudem,2026,1,1.96,0.2126,21.3,NO_DROUGHT
+Rangareddy,Chowdergudem,2026,1,2.08,0.2124,21.2,NO_DROUGHT
+Rajanna Sircilla,Mustabad,2026,1,0.72,0.2123,21.2,NO_DROUGHT
+Hyderabad,Saidabad,2026,1,0.66,0.2122,21.2,NO_DROUGHT
+Rangareddy,Kondurg,2026,1,2.17,0.2122,21.2,NO_DROUGHT
+Sangareddy,Pulkal,2026,1,1.31,0.2121,21.2,NO_DROUGHT
+Hanumakonda,Kamalapur,2026,1,0.53,0.2116,21.2,NO_DROUGHT
+Hyderabad,Asifnagar,2026,1,0.6,0.2116,21.2,NO_DROUGHT
+Vikarabad,Bantwaram,2026,1,0.76,0.2116,21.2,NO_DROUGHT
+Mancherial,Mandamarri,2026,1,0.26,0.2113,21.1,NO_DROUGHT
+Nizamabad,Kammarpalle,2026,1,0.8,0.2108,21.1,NO_DROUGHT
+Hyderabad,Charminar,2026,1,0.74,0.2106,21.1,NO_DROUGHT
+Rangareddy,Hayathnagar,2026,1,0.4,0.2104,21.0,NO_DROUGHT
+Adilabad,Inderavelly,2026,1,0.43,0.2104,21.0,NO_DROUGHT
+Sangareddy,Nagalgidda,2026,1,0.47,0.2104,21.0,NO_DROUGHT
+Yadadri Bhuvanagiri,Ramannapeta,2026,1,0.21,0.2096,21.0,NO_DROUGHT
+Mahabubabad,Dornakal,2026,1,0.33,0.2096,21.0,NO_DROUGHT
+Nalgonda,Chinthapalle,2026,1,0.69,0.2096,21.0,NO_DROUGHT
+Peddapalli,Kamanpur,2026,1,0.4,0.2094,20.9,NO_DROUGHT
+Hyderabad,Golkonda,2026,1,0.61,0.2094,20.9,NO_DROUGHT
+Rangareddy,Chevella,2026,1,0.63,0.2094,20.9,NO_DROUGHT
+Sangareddy,Jharasangam,2026,1,0.27,0.2093,20.9,NO_DROUGHT
+Medak,Ramayampet,2026,1,2.37,0.2092,20.9,NO_DROUGHT
+Medak,Regode,2026,1,0.57,0.2086,20.9,NO_DROUGHT
+Sangareddy,Manoor,2026,1,0.44,0.2084,20.8,NO_DROUGHT
+Mancherial,Tandur,2026,1,0.52,0.2082,20.8,NO_DROUGHT
+Mancherial,Bellampalle,2026,1,0.5,0.2081,20.8,NO_DROUGHT
+Jagtial,Pegadapalle,2026,1,0.32,0.208,20.8,NO_DROUGHT
+Hanumakonda,Dharmasagar,2026,1,0.49,0.208,20.8,NO_DROUGHT
+Yadadri Bhuvanagiri,Choutuppal,2026,1,1.03,0.208,20.8,NO_DROUGHT
+Kamareddy,Tadwai,2026,1,0.14,0.2079,20.8,NO_DROUGHT
+Hanumakonda,Velair,2026,1,0.28,0.2079,20.8,NO_DROUGHT
+Rangareddy,Maheshwaram,2026,1,0.47,0.2079,20.8,NO_DROUGHT
+Nizamabad,Mosra,2026,1,0.13,0.2077,20.8,NO_DROUGHT
+Sangareddy,Raikode,2026,1,0.32,0.2077,20.8,NO_DROUGHT
+Sangareddy,Munipalli,2026,1,0.92,0.2073,20.7,NO_DROUGHT
+Nirmal,Lokeswaram,2026,1,0.19,0.2072,20.7,NO_DROUGHT
+Sangareddy,Watpalle,2026,1,0.19,0.2072,20.7,NO_DROUGHT
+Mahabubabad,Chinnagudur,2026,1,0.29,0.2071,20.7,NO_DROUGHT
+Siddipet,Rayapole,2026,1,0.57,0.2071,20.7,NO_DROUGHT
+Adilabad,Mavala,2026,1,0.27,0.2069,20.7,NO_DROUGHT
+Sangareddy,Hathanoora,2026,1,1.5,0.2069,20.7,NO_DROUGHT
+Medak,Tupran,2026,1,0.72,0.2068,20.7,NO_DROUGHT
+Nizamabad,Dharpalle,2026,1,0.54,0.2065,20.6,NO_DROUGHT
+Nalgonda,Pedda_Adiserlapalle,2026,1,0.76,0.2061,20.6,NO_DROUGHT
+Siddipet,Komaravelly,2026,1,1.04,0.2061,20.6,NO_DROUGHT
+Adilabad,Tamsi,2026,1,0.5,0.206,20.6,NO_DROUGHT
+Vikarabad,Mominpet,2026,1,0.63,0.2058,20.6,NO_DROUGHT
+Nizamabad,30,2026,1,0.2,0.2057,20.6,NO_DROUGHT
+Jayashankar,Mahadevpur,2026,1,1.93,0.2056,20.6,NO_DROUGHT
+Mahabubnagar,Jadcherla,2026,1,0.72,0.2052,20.5,NO_DROUGHT
+Jangaon,Chilpur,2026,1,0.41,0.205,20.5,NO_DROUGHT
+Jogulamba Gadwal,Rajoli,2026,1,0.11,0.2047,20.5,NO_DROUGHT
+Medchal-Malkajgiri,Medchel,2026,1,0.47,0.2047,20.5,NO_DROUGHT
+Nagarkurnool,Charakonda,2026,1,0.86,0.2043,20.4,NO_DROUGHT
+Jangaon,Tharigoppula,2026,1,0.21,0.2041,20.4,NO_DROUGHT
+Yadadri Bhuvanagiri,Mootakondur,2026,1,0.5,0.204,20.4,NO_DROUGHT
+Warangal,Wardhannapet,2026,1,0.53,0.2033,20.3,NO_DROUGHT
+Nalgonda,Tirumalagiri_Sagar,2026,1,0.3,0.2032,20.3,NO_DROUGHT
+Adilabad,Bazarhathnoor,2026,1,0.17,0.2031,20.3,NO_DROUGHT
+Bhadradri Kothagudem,Allapalli,2026,1,0.27,0.2031,20.3,NO_DROUGHT
+Sangareddy,Mogdampalle,2026,1,0.3,0.2027,20.3,NO_DROUGHT
+Mulugu,Wazeed,2026,1,0.57,0.2027,20.3,NO_DROUGHT
+Yadadri Bhuvanagiri,Bhongiri,2026,1,0.51,0.2024,20.2,NO_DROUGHT
+Mancherial,Mancherial,2026,1,0.29,0.2023,20.2,NO_DROUGHT
+Mancherial,Bheemini,2026,1,0.54,0.2023,20.2,NO_DROUGHT
+Adilabad,Bela,2026,1,0.3,0.202,20.2,NO_DROUGHT
+Mahabubabad,Maripeda,2026,1,0.47,0.2019,20.2,NO_DROUGHT
+Rangareddy,Keshampeta,2026,1,0.43,0.2013,20.1,NO_DROUGHT
+Adilabad,Ichoda,2026,1,0.48,0.2006,20.1,NO_DROUGHT
+Nagarkurnool,Thimmajipeta,2026,1,0.8,0.2003,20.0,NO_DROUGHT
+Mahabubabad,Nellikudur,2026,1,0.55,0.2002,20.0,NO_DROUGHT
+Rajanna Sircilla,Konaraopeta,2026,1,0.49,0.2,20.0,NO_DROUGHT
+Vikarabad,Nawabpet,2026,1,0.67,0.2,20.0,NO_DROUGHT
+Medak,Manoharabad,2026,1,0.4,0.1998,20.0,NO_DROUGHT
+Suryapet,Kodad,2026,1,0.44,0.1998,20.0,NO_DROUGHT
+Nalgonda,Miryalaguda,2026,1,0.6,0.1995,20.0,NO_DROUGHT
+Hanumakonda,Hasanparthy,2026,1,0.44,0.1993,19.9,NO_DROUGHT
+Mahabubnagar,Balanagar,2026,1,0.72,0.1988,19.9,NO_DROUGHT
+Vikarabad,Marpalle,2026,1,1.39,0.1988,19.9,NO_DROUGHT
+Mulugu,Govindaraopet,2026,1,0.73,0.1983,19.8,NO_DROUGHT
+Mancherial,Kotapalle,2026,1,0.41,0.1979,19.8,NO_DROUGHT
+Khammam,Nelakondapalle,2026,1,0.51,0.1977,19.8,NO_DROUGHT
+Mulugu,Venkatapuram,2026,1,1.38,0.1977,19.8,NO_DROUGHT
+Medchal-Malkajgiri,Shamirpet,2026,1,0.21,0.1976,19.8,NO_DROUGHT
+Warangal,Narsampet,2026,1,0.45,0.1975,19.7,NO_DROUGHT
+Hanumakonda,Parkal,2026,1,1.34,0.1974,19.7,NO_DROUGHT
+Nalgonda,Chityala,2026,1,0.45,0.1967,19.7,NO_DROUGHT
+Mahabubabad,Kothaguda,2026,1,0.4,0.196,19.6,NO_DROUGHT
+Jogulamba Gadwal,Alampur,2026,1,0.7,0.1956,19.6,NO_DROUGHT
+Nalgonda,Gundlapalle,2026,1,0.47,0.1953,19.5,NO_DROUGHT
+Siddipet,Jagadevpur,2026,1,0.57,0.1953,19.5,NO_DROUGHT
+Rangareddy,Shamshabad,2026,1,0.6,0.1945,19.4,NO_DROUGHT
+Nalgonda,Nidamanur,2026,1,0.22,0.1943,19.4,NO_DROUGHT
+Bhadradri Kothagudem,Gundala,2026,1,0.36,0.1943,19.4,NO_DROUGHT
+Yadadri Bhuvanagiri,Yadagirigutta,2026,1,0.66,0.1942,19.4,NO_DROUGHT
+Wanaparthy,Atmakur,2026,1,0.07,0.1941,19.4,NO_DROUGHT
+Kamareddy,Bhiknur,2026,1,0.84,0.1941,19.4,NO_DROUGHT
+Suryapet,Neredcherla,2026,1,2.32,0.1938,19.4,NO_DROUGHT
+Sangareddy,Sangareddy,2026,1,1.01,0.1936,19.4,NO_DROUGHT
+Warangal,Geesugonda,2026,1,0.75,0.1935,19.3,NO_DROUGHT
+Nalgonda,Damaracherla,2026,1,0.58,0.1926,19.3,NO_DROUGHT
+Rangareddy,Shankarpalle,2026,1,0.81,0.1926,19.3,NO_DROUGHT
+Sangareddy,Sadasivpet,2026,1,0.81,0.1926,19.3,NO_DROUGHT
+Peddapalli,Odela,2026,1,0.31,0.1921,19.2,NO_DROUGHT
+Wanaparthy,Kothakota,2026,1,0.41,0.1921,19.2,NO_DROUGHT
+Mulugu,Mangapet,2026,1,1.15,0.1918,19.2,NO_DROUGHT
+Rangareddy,Amangal,2026,1,0.66,0.1916,19.2,NO_DROUGHT
+Nalgonda,Devarakonda,2026,1,0.3,0.1915,19.2,NO_DROUGHT
+Warangal,Sangem,2026,1,2.23,0.1915,19.1,NO_DROUGHT
+Nalgonda,Adavi Devula Palli,2026,1,0.51,0.1913,19.1,NO_DROUGHT
+Wanaparthy,Chinnambavi,2026,1,0.55,0.1913,19.1,NO_DROUGHT
+Hanumakonda,Hanumakonda,2026,1,0.83,0.1912,19.1,NO_DROUGHT
+Wanaparthy,Revelly,2026,1,1.5,0.1912,19.1,NO_DROUGHT
+Suryapet,Chivvemla,2026,1,0.36,0.1908,19.1,NO_DROUGHT
+Hyderabad,Bandlaguda,2026,1,0.65,0.1904,19.0,NO_DROUGHT
+Suryapet,Mellachervu,2026,1,0.24,0.1901,19.0,NO_DROUGHT
+Medchal-Malkajgiri,Bachpalle,2026,1,0.4,0.1901,19.0,NO_DROUGHT
+Khammam,Kusumanchi,2026,1,0.51,0.19,19.0,NO_DROUGHT
+Suryapet,Jajireddigudem,2026,1,0.15,0.1897,19.0,NO_DROUGHT
+Mahabubabad,Danthalapalle,2026,1,0.57,0.1894,18.9,NO_DROUGHT
+Wanaparthy,Madanapur,2026,1,0.3,0.1892,18.9,NO_DROUGHT
+Suryapet,Mattampalle,2026,1,0.35,0.1886,18.9,NO_DROUGHT
+Peddapalli,Srirampur,2026,1,0.35,0.1885,18.8,NO_DROUGHT
+Rangareddy,Talakondapalle,2026,1,0.95,0.1884,18.8,NO_DROUGHT
+Bhadradri Kothagudem,Yellandu,2026,1,0.37,0.1882,18.8,NO_DROUGHT
+Kumuram Bheem,Dahegaon,2026,1,1.42,0.1875,18.7,NO_DROUGHT
+Warangal,Nekkonda,2026,1,0.27,0.187,18.7,NO_DROUGHT
+Siddipet,Narayanraopet,2026,1,0.73,0.1864,18.6,NO_DROUGHT
+Suryapet,Palakeedu,2026,1,1.88,0.1858,18.6,NO_DROUGHT
+Mulugu,Eturunagaram,2026,1,1.04,0.1857,18.6,NO_DROUGHT
+Hyderabad,Nampally,2026,1,0.45,0.1853,18.5,NO_DROUGHT
+Nirmal,Nirmal,2026,1,0.23,0.1848,18.5,NO_DROUGHT
+Jangaon,Lingalaghanpur,2026,1,0.52,0.1847,18.5,NO_DROUGHT
+Khammam,Thirumalayapalem,2026,1,0.26,0.1846,18.5,NO_DROUGHT
+Medak,Havelighanpur,2026,1,0.17,0.1845,18.5,NO_DROUGHT
+Vikarabad,Tandur,2026,1,0.48,0.1838,18.4,NO_DROUGHT
+Mancherial,Vemanpalle,2026,1,1.82,0.1836,18.4,NO_DROUGHT
+Suryapet,Munagala,2026,1,0.3,0.1834,18.3,NO_DROUGHT
+Warangal,Nallabelly,2026,1,0.64,0.183,18.3,NO_DROUGHT
+Mancherial,Nennal,2026,1,0.62,0.1828,18.3,NO_DROUGHT
+Yadadri Bhuvanagiri,Narayanapur,2026,1,0.58,0.182,18.2,NO_DROUGHT
+Hanumakonda,Damera,2026,1,0.64,0.1814,18.1,NO_DROUGHT
+Suryapet,Huzur Nagar,2026,1,0.47,0.1813,18.1,NO_DROUGHT
+Jogulamba Gadwal,Waddepalle,2026,1,0.37,0.1812,18.1,NO_DROUGHT
+Nizamabad,Sirkonda,2026,1,1.18,0.1812,18.1,NO_DROUGHT
+Adilabad,Jainad,2026,1,0.28,0.1811,18.1,NO_DROUGHT
+Jogulamba Gadwal,Itikyal,2026,1,0.32,0.1811,18.1,NO_DROUGHT
+Nalgonda,Kondamallapally,2026,1,0.23,0.1807,18.1,NO_DROUGHT
+Rangareddy,Balapur,2026,1,0.37,0.1797,18.0,NO_DROUGHT
+Suryapet,Nagaram,2026,1,0.22,0.1782,17.8,NO_DROUGHT
+Jangaon,Palakurthi,2026,1,0.44,0.1782,17.8,NO_DROUGHT
+Adilabad,Adilabad Rural,2026,1,0.26,0.1778,17.8,NO_DROUGHT
+Medak,Medak,2026,1,0.69,0.1772,17.7,NO_DROUGHT
+Nalgonda,Nakrekal,2026,1,0.43,0.1769,17.7,NO_DROUGHT
+Vikarabad,Yelal,2026,1,0.27,0.1758,17.6,NO_DROUGHT
+Mahabubabad,18,2026,1,0.32,0.1754,17.5,NO_DROUGHT
+Wanaparthy,Veepangandla,2026,1,0.74,0.1746,17.5,NO_DROUGHT
+Nagarkurnool,Padra,2026,1,2.03,0.1746,17.5,NO_DROUGHT
+Jangaon,Kodakandla,2026,1,0.58,0.1745,17.5,NO_DROUGHT
+Nalgonda,Madugulapally,2026,1,0.57,0.1741,17.4,NO_DROUGHT
+Jangaon,Devaruppala,2026,1,1.01,0.1734,17.3,NO_DROUGHT
+Mahabubabad,Thorrur,2026,1,0.56,0.1731,17.3,NO_DROUGHT
+Mahabubabad,17,2026,1,1.47,0.173,17.3,NO_DROUGHT
+Siddipet,Chinnakodur,2026,1,0.74,0.1724,17.2,NO_DROUGHT
+Suryapet,Thungathurthi,2026,1,0.21,0.1723,17.2,NO_DROUGHT
+Mahabubabad,Ganagavaram,2026,1,0.57,0.1715,17.1,NO_DROUGHT
+Nalgonda,Chandur,2026,1,0.52,0.1701,17.0,NO_DROUGHT
+Jayashankar,Tekumatla,2026,1,0.55,0.1695,16.9,NO_DROUGHT
+Siddipet,Husnabad,2026,1,0.26,0.1688,16.9,NO_DROUGHT
+Suryapet,Suryapet,2026,1,0.23,0.1678,16.8,NO_DROUGHT
+Kamareddy,Domakonda,2026,1,1.01,0.1677,16.8,NO_DROUGHT
+Suryapet,Maddirala,2026,1,0.24,0.1673,16.7,NO_DROUGHT
+Nalgonda,Neredugommu,2026,1,0.55,0.167,16.7,NO_DROUGHT
+Warangal,Raiparthy,2026,1,0.5,0.1662,16.6,NO_DROUGHT
+Warangal,Parvathagiri,2026,1,0.27,0.1644,16.4,NO_DROUGHT
+Mahabubabad,Kuravi,2026,1,0.24,0.1642,16.4,NO_DROUGHT
+Mahabubabad,Peddavangara,2026,1,0.22,0.1633,16.3,NO_DROUGHT
+Yadadri Bhuvanagiri,Addagudur,2026,1,0.35,0.1629,16.3,NO_DROUGHT
+Nalgonda,Anumula_Haliya,2026,1,1.03,0.1626,16.3,NO_DROUGHT
+Mulugu,Tadvai,2026,1,0.46,0.1622,16.2,NO_DROUGHT
+Peddapalli,Mutharam_Manthani,2026,1,1.5,0.1588,15.9,NO_DROUGHT
+Hanumakonda,Shayampet,2026,1,2.16,0.1587,15.9,NO_DROUGHT
+Warangal,Khilla_Warangal,2026,1,0.47,0.1586,15.9,NO_DROUGHT
+Nalgonda,Kattangoor,2026,1,0.38,0.1585,15.8,NO_DROUGHT
+Nalgonda,Thipparthi,2026,1,0.38,0.1583,15.8,NO_DROUGHT
+Jangaon,Zaffergadh,2026,1,0.72,0.1574,15.7,NO_DROUGHT
+Nalgonda,Nalgonda,2026,1,0.51,0.1572,15.7,NO_DROUGHT
+Nalgonda,Gurrampode,2026,1,0.48,0.1569,15.7,NO_DROUGHT
+Suryapet,Penpahad,2026,1,0.48,0.1565,15.7,NO_DROUGHT
+Nalgonda,Vemulapalle,2026,1,0.46,0.1563,15.6,NO_DROUGHT
+Nagarkurnool,Kodair,2026,1,0.21,0.1549,15.5,NO_DROUGHT
+Nalgonda,Marriguda,2026,1,1.47,0.1545,15.5,NO_DROUGHT
+Hanumakonda,Atmakur,2026,1,1.67,0.154,15.4,NO_DROUGHT
+Nirmal,Mudhole,2026,1,0.29,0.1514,15.1,NO_DROUGHT
+Hanumakonda,Bheemadevarapalle,2026,1,0.2,0.151,15.1,NO_DROUGHT
+Karimnagar,Huzurabad,2026,1,0.35,0.1509,15.1,NO_DROUGHT
+Suryapet,Thirumalagiri,2026,1,0.38,0.1507,15.1,NO_DROUGHT
+Nalgonda,Chandampet,2026,1,0.39,0.1506,15.1,NO_DROUGHT
+Nalgonda,Peddavura,2026,1,1.64,0.1454,14.5,NO_DROUGHT
+Nalgonda,32,2026,1,0.43,0.1452,14.5,NO_DROUGHT
+Hanumakonda,Nadikuda,2026,1,0.47,0.1452,14.5,NO_DROUGHT
+Nalgonda,Narketpalle,2026,1,0.62,0.1449,14.5,NO_DROUGHT
+Yadadri Bhuvanagiri,Valigonda,2026,1,0.42,0.1448,14.5,NO_DROUGHT
+Nalgonda,Kangal,2026,1,1.12,0.1423,14.2,NO_DROUGHT
+Nalgonda,Saligouraram,2026,1,0.41,0.1364,13.6,NO_DROUGHT
+Nalgonda,Munugode,2026,1,0.46,0.1348,13.5,NO_DROUGHT
+Yadadri Bhuvanagiri,Gundala,2026,1,0.67,0.1329,13.3,NO_DROUGHT

@@ -1,0 +1,21 @@
+.venv/
+backend/.venv/
+
+# Keep only app-used output artifacts
+outputs/*
+!outputs/core_gp_priority.csv
+!outputs/core_mandal_climate_predictions.csv
+!outputs/core_monthly_climate_features.csv
+!outputs/core_scheme_recommendations.csv
+!outputs/dashboard_core/
+outputs/dashboard_core/*
+!outputs/dashboard_core/core_kpis.json
+
+backend/outputs/*
+!backend/outputs/core_gp_priority.csv
+!backend/outputs/core_mandal_climate_predictions.csv
+!backend/outputs/core_monthly_climate_features.csv
+!backend/outputs/core_scheme_recommendations.csv
+!backend/outputs/dashboard_core/
+backend/outputs/dashboard_core/*
+!backend/outputs/dashboard_core/core_kpis.json

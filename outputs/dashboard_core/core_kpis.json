@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-03-08",
+  "mandals_predicted": 621,
+  "drought_predicted_mandals": 0,
+  "gps_ranked": 10837,
+  "critical_gps": 0,
+  "high_priority_gps": 396,
+  "recommendation_rows": 32511,
+  "unique_recommended_schemes": 7,
+  "avg_drought_probability_pct": 23.41,
+  "avg_priority_score": 35.62
+}
