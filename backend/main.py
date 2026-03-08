@@ -29,6 +29,7 @@ import hashlib
 import logging
 import html
 import sqlite3
+import shutil
 from io import BytesIO
 import textwrap
 import time
@@ -67,10 +68,35 @@ def _find_outputs() -> Path:
         return root_outputs
     return _HERE / "outputs"  # fallback: backend/outputs/
 
+def _outputs_candidates() -> list[Path]:
+    # Priority: explicit OUTPUTS_DIR -> repo outputs -> backend/outputs
+    seen = set()
+    candidates = []
+    for p in [
+        Path(os.getenv("OUTPUTS_DIR")) if os.getenv("OUTPUTS_DIR") else None,
+        _HERE.parent / "outputs",
+        _HERE / "outputs",
+    ]:
+        if p is None:
+            continue
+        rp = p.resolve()
+        if rp not in seen:
+            seen.add(rp)
+            candidates.append(rp)
+    return candidates
+
 OUTPUTS    = _find_outputs()
 DASHBOARD  = OUTPUTS / "dashboard_core"
 CACHE_DIR.mkdir(exist_ok=True)
 UPLOAD_DIR.mkdir(exist_ok=True)
+
+REQUIRED_OUTPUT_FILES = [
+    "core_gp_priority.csv",
+    "core_mandal_climate_predictions.csv",
+    "core_monthly_climate_features.csv",
+    "core_scheme_recommendations.csv",
+    "dashboard_core/core_kpis.json",
+]
 
 # ── Cache backend ──────────────────────────────────────────────────────────────
 CACHE_BACKEND      = os.getenv("CACHE_BACKEND", "local").strip().lower()
@@ -272,6 +298,52 @@ def load_csv(name: str) -> pd.DataFrame:
     if "GP_Name" in df.columns:
         df["GP_Name"] = df["GP_Name"].astype(str).str.strip().str.title()
     return df
+
+def _outputs_status() -> dict:
+    OUTPUTS.mkdir(parents=True, exist_ok=True)
+    DASHBOARD.mkdir(parents=True, exist_ok=True)
+
+    files = {}
+    missing = []
+    for rel in REQUIRED_OUTPUT_FILES:
+        p = OUTPUTS / rel
+        ok = p.exists()
+        files[rel] = {"exists": ok, "path": str(p)}
+        if not ok:
+            missing.append(rel)
+
+    return {
+        "outputs_dir": str(OUTPUTS),
+        "dashboard_dir": str(DASHBOARD),
+        "required_files": files,
+        "missing_files": missing,
+        "ready": len(missing) == 0,
+    }
+
+def _bootstrap_outputs() -> dict:
+    status_before = _outputs_status()
+    if status_before["ready"]:
+        return {"restored": [], "missing_after": [], "status": status_before}
+
+    restored = []
+    missing = set(status_before["missing_files"])
+    candidates = [p for p in _outputs_candidates() if p != OUTPUTS]
+    OUTPUTS.mkdir(parents=True, exist_ok=True)
+    DASHBOARD.mkdir(parents=True, exist_ok=True)
+
+    for rel in list(missing):
+        dst = OUTPUTS / rel
+        for src_root in candidates:
+            src = src_root / rel
+            if src.exists():
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dst)
+                restored.append({"file": rel, "from": str(src), "to": str(dst)})
+                missing.discard(rel)
+                break
+
+    status_after = _outputs_status()
+    return {"restored": restored, "missing_after": sorted(list(missing)), "status": status_after}
 
 def nan_safe(df: pd.DataFrame) -> list:
     return json.loads(df.to_json(orient="records"))
@@ -492,6 +564,28 @@ def get_kpis(user=Depends(get_current_user)):
         )
     with open(path) as f:
         return json.load(f)
+
+@app.post("/api/data/bootstrap")
+def bootstrap_data(user=Depends(get_current_user)):
+    if user["role"] == "citizen":
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Citizens cannot bootstrap datasets")
+
+    result = _bootstrap_outputs()
+    if result["status"]["ready"]:
+        return {
+            "ok": True,
+            "message": "All required output datasets are present.",
+            **result,
+        }
+
+    raise HTTPException(
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        {
+            "ok": False,
+            "message": "Required output datasets are still missing after bootstrap attempt.",
+            **result,
+        },
+    )
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ORIGINAL DUALRAG ROUTES (unchanged)
@@ -716,8 +810,22 @@ def _mock_query_result(question: str, hash_key: str) -> dict:
 
 @app.get("/api/health")
 async def health():
+    outputs = _outputs_status()
+    users_db_exists = USERS_DB_PATH.exists()
+    users_count = 0
+    users_db_ok = False
+    users_db_error = None
+    try:
+        with _db_conn() as conn:
+            row = conn.execute("SELECT COUNT(*) AS c FROM users").fetchone()
+            users_count = int(row["c"] if row else 0)
+            users_db_ok = True
+    except Exception as exc:
+        users_db_error = str(exc)
+
+    overall = "healthy" if outputs["ready"] and users_db_ok else "degraded"
     return {
-        "status": "healthy",
+        "status": overall,
         "execution_available": EXECUTION_AVAILABLE,
         "ingestion_available": INGESTION_AVAILABLE,
         "llm_provider": exec_config.get("llm.provider") if exec_config else "unknown",
@@ -725,6 +833,15 @@ async def health():
         "cache_backend": CACHE_BACKEND,
         "dynamodb_table": DYNAMODB_TABLE_NAME if _is_ddb_enabled() else None,
         "pipeline_dir": str(_HERE),
+        "outputs": outputs,
+        "auth_store": {
+            "type": "sqlite",
+            "path": str(USERS_DB_PATH),
+            "exists": users_db_exists,
+            "ok": users_db_ok,
+            "user_count": users_count,
+            "error": users_db_error,
+        },
     }
 
 @app.get("/api/indexes/stats")
