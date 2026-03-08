@@ -103,12 +103,16 @@ CACHE_BACKEND      = os.getenv("CACHE_BACKEND", "local").strip().lower()
 DYNAMODB_TABLE_NAME = os.getenv("DYNAMODB_TABLE", "").strip()
 AWS_REGION         = os.getenv("AWS_REGION", "us-east-1")
 _dynamodb_table    = None
+_bedrock_runtime   = None
 
 # ── Auth config ────────────────────────────────────────────────────────────────
 SECRET_KEY           = os.getenv("SECRET_KEY", "change-me-in-production-32-chars!!")
 ALGORITHM            = "HS256"
 TOKEN_EXPIRE_MINUTES = 60 * 8
 USERS_DB_PATH        = _HERE / "data" / "users.sqlite3"
+BEDROCK_MODEL_ID     = os.getenv("BEDROCK_MODEL_ID", "us.amazon.nova-2-lite-v1:0").strip()
+BEDROCK_MAX_TOKENS   = int(os.getenv("BEDROCK_MAX_TOKENS", "300"))
+BEDROCK_TEMPERATURE  = float(os.getenv("BEDROCK_TEMPERATURE", "0.3"))
 
 # ── Import execution.py and ingestion.py ──────────────────────────────────────
 try:
@@ -230,6 +234,10 @@ class RegisterRequest(BaseModel):
     mandal:   str = ""
     gp:       str = ""
 
+class PageChatRequest(BaseModel):
+    page: str
+    question: str
+
 def make_token(username: str) -> str:
     exp = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_MINUTES)
     return jwt.encode({"sub": username, "exp": exp}, SECRET_KEY, algorithm=ALGORITHM)
@@ -347,6 +355,65 @@ def _bootstrap_outputs() -> dict:
 
 def nan_safe(df: pd.DataFrame) -> list:
     return json.loads(df.to_json(orient="records"))
+
+PAGE_CHAT_HINTS = {
+    "prediction": "Focus on rainfall forecasts, drought probability, and interpretation of climate prediction metrics.",
+    "recommend": "Focus on recommended schemes, rationale, and how to prioritize them for the selected geography.",
+    "analysis": "Focus on trend analysis, tier/risk distributions, and data-driven insights from dashboard charts.",
+    "alerts": "Focus on drought alerts, severity understanding, and practical local precautions.",
+    "schemes": "Focus on citizen-friendly explanation of recommended schemes and likely benefits.",
+    "weather": "Focus on weather outlook and practical interpretation for local planning.",
+    "execution": "Focus on query/report generation workflow and how to ask clear scheme questions.",
+    "ingestion": "Focus on document ingestion steps, metadata quality, and troubleshooting ingestion issues.",
+}
+
+def _get_bedrock_runtime():
+    global _bedrock_runtime
+    if _bedrock_runtime is None:
+        import boto3
+        _bedrock_runtime = boto3.client("bedrock-runtime", region_name=AWS_REGION)
+    return _bedrock_runtime
+
+def _chat_scope(user: dict) -> str:
+    bits = []
+    if user.get("district"): bits.append(f"District={user['district']}")
+    if user.get("mandal"): bits.append(f"Mandal={user['mandal']}")
+    if user.get("gp"): bits.append(f"GP={user['gp']}")
+    return ", ".join(bits) if bits else "No specific geography set"
+
+def _page_chat_system_prompt(page: str, user: dict) -> str:
+    hint = PAGE_CHAT_HINTS.get(page, "Answer only questions relevant to the current dashboard page.")
+    return (
+        "You are GramSaarthi Assistant inside a rural governance dashboard. "
+        "Keep answers concise, practical, and page-specific. "
+        "Use plain text only: no markdown headers, no bold markers, no tables. "
+        "Format response in short sections with line breaks: Summary, Key Points, Next Action. "
+        "If asked out-of-scope questions, politely redirect to page-relevant help. "
+        f"Current page: {page}. "
+        f"User role: {user.get('role','unknown')}. "
+        f"User scope: {_chat_scope(user)}. "
+        f"Guidance: {hint}"
+    )
+
+def _invoke_page_chat(question: str, page: str, user: dict) -> dict:
+    client = _get_bedrock_runtime()
+    response = client.converse(
+        modelId=BEDROCK_MODEL_ID,
+        system=[{"text": _page_chat_system_prompt(page, user)}],
+        messages=[{"role": "user", "content": [{"text": question}]}],
+        inferenceConfig={"maxTokens": BEDROCK_MAX_TOKENS, "temperature": BEDROCK_TEMPERATURE},
+    )
+    content = response.get("output", {}).get("message", {}).get("content", [])
+    answer = " ".join(
+        [part.get("text", "") for part in content if isinstance(part, dict) and part.get("text")]
+    ).strip()
+    if not answer:
+        answer = "I could not generate a response right now. Please try again."
+    return {
+        "answer": answer,
+        "model_id": BEDROCK_MODEL_ID,
+        "usage": response.get("usage", {}),
+    }
 
 def scope(df, user, gp_col="GP_Name"):
     role = user["role"]
@@ -586,6 +653,22 @@ def bootstrap_data(user=Depends(get_current_user)):
             **result,
         },
     )
+
+@app.post("/api/page-chat")
+def page_chat(req: PageChatRequest, user=Depends(get_current_user)):
+    page = (req.page or "").strip().lower()
+    question = (req.question or "").strip()
+    if not question:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "question is required")
+    if len(question) > 2000:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "question is too long (max 2000 chars)")
+
+    try:
+        result = _invoke_page_chat(question, page, user)
+        return {"page": page, **result}
+    except Exception as exc:
+        logger.error(f"Bedrock page-chat failed: {exc}")
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, "Chat assistant is temporarily unavailable")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ORIGINAL DUALRAG ROUTES (unchanged)
@@ -841,6 +924,11 @@ async def health():
             "ok": users_db_ok,
             "user_count": users_count,
             "error": users_db_error,
+        },
+        "chat_assistant": {
+            "provider": "bedrock",
+            "model_id": BEDROCK_MODEL_ID,
+            "region": AWS_REGION,
         },
     }
 

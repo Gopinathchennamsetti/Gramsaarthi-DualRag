@@ -1363,6 +1363,17 @@ const NAV_LABELS = {
   alerts: "🚨 Alerts", schemes: "📋 Schemes", weather: "🌤 Weather",
 };
 
+const PAGE_HELP_LABELS = {
+  prediction: "Climate Predictions",
+  recommend: "Scheme Recommendations",
+  analysis: "Analysis & Insights",
+  execution: "Query Assistant",
+  ingestion: "Document Ingestion",
+  alerts: "Drought Alerts",
+  schemes: "Village Schemes",
+  weather: "Weather Outlook",
+};
+
 // ── Auth context (simple — no React context, just props) ───────────────────────
 
 // ── Component: RoleBadge ───────────────────────────────────────────────────────
@@ -2098,6 +2109,103 @@ const CitizenWeatherPage = ({ user, toast }) => {
   );
 };
 
+const PageAssistant = ({ activePage, toast }) => {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const intro = `Ask me anything about ${PAGE_HELP_LABELS[activePage] || "this page"}.`;
+  const [messages, setMessages] = useState([{ role: "assistant", text: intro }]);
+
+  useEffect(() => {
+    setMessages([{ role: "assistant", text: `You are now on ${PAGE_HELP_LABELS[activePage] || activePage}. Ask page-specific questions.` }]);
+    setInput("");
+  }, [activePage]);
+
+  const send = async () => {
+    const q = input.trim();
+    if (!q || loading) return;
+    setInput("");
+    setMessages(prev => [...prev, { role: "user", text: q }]);
+    setLoading(true);
+    try {
+      const data = await dash("/api/page-chat", {
+        method: "POST",
+        body: JSON.stringify({ page: activePage, question: q }),
+      });
+      setMessages(prev => [...prev, { role: "assistant", text: data.answer || "No response." }]);
+    } catch (e) {
+      const msg = e.message || "Chat failed";
+      setMessages(prev => [...prev, { role: "assistant", text: `Error: ${msg}` }]);
+      if (toast) toast(msg, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          position: "fixed", right: 18, bottom: 18, zIndex: 50, border: "none", cursor: "pointer",
+          background: "linear-gradient(135deg,#2aa294,#0f766e)", color: "#fff", borderRadius: 999,
+          padding: "10px 14px", fontSize: 12, fontWeight: 700, letterSpacing: "0.06em",
+          boxShadow: "0 10px 28px rgba(15,118,110,0.3)"
+        }}
+      >
+        Ask AI
+      </button>
+    );
+  }
+
+  return (
+    <div style={{
+      position: "fixed", right: 18, bottom: 18, zIndex: 50, width: "min(380px, calc(100vw - 24px))",
+      background: "#ffffff", border: "1px solid #c7dcd7", borderRadius: 12, boxShadow: "0 16px 36px rgba(27,43,67,0.2)",
+      display: "flex", flexDirection: "column", overflow: "hidden"
+    }}>
+      <div style={{ padding: "10px 12px", borderBottom: "1px solid #edf2f0", background: "#f8f2e8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: 11, color: "#1a2333", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Gramsaarthi Assistant</div>
+          <div style={{ fontSize: 10, color: "#46566c" }}>{PAGE_HELP_LABELS[activePage] || activePage}</div>
+        </div>
+        <button onClick={() => setOpen(false)} style={{ border: "none", background: "transparent", cursor: "pointer", color: "#46566c", fontSize: 18, lineHeight: 1 }}>×</button>
+      </div>
+
+      <div style={{ maxHeight: 300, overflowY: "auto", padding: 10, display: "flex", flexDirection: "column", gap: 8, background: "#fcfdfd" }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{
+            alignSelf: m.role === "user" ? "flex-end" : "flex-start",
+            maxWidth: "90%", padding: "8px 10px", borderRadius: 10,
+            background: m.role === "user" ? "#0f766e" : "#eef5f4",
+            color: m.role === "user" ? "#fff" : "#1a2333", fontSize: 12, lineHeight: 1.5,
+            whiteSpace: "pre-wrap"
+          }}>
+            {m.text}
+          </div>
+        ))}
+        {loading && <div style={{ fontSize: 11, color: "#46566c" }}>Thinking...</div>}
+      </div>
+
+      <div style={{ display: "flex", gap: 8, padding: 10, borderTop: "1px solid #edf2f0", background: "#fff" }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") send(); }}
+          placeholder="Ask about this page..."
+          style={{ flex: 1, border: "1px solid #c7dcd7", borderRadius: 8, padding: "8px 10px", fontSize: 12 }}
+        />
+        <button onClick={send} disabled={loading || !input.trim()} style={{
+          border: "none", borderRadius: 8, padding: "8px 12px", cursor: "pointer",
+          background: loading || !input.trim() ? "#9ccfc7" : "#0f766e", color: "#fff", fontSize: 12, fontWeight: 700
+        }}>
+          Send
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // ══════════════════════════════════════════════════════════════════════════════
 // MAIN APP
 // ══════════════════════════════════════════════════════════════════════════════
@@ -2197,6 +2305,7 @@ export default function App() {
         {user.role === "citizen" && activePage === "weather" && <CitizenWeatherPage user={user} toast={showToast} />}
       </main>
 
+      <PageAssistant activePage={activePage} toast={showToast} />
       {toast && <Toast key={toast.id} msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
