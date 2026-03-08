@@ -1,0 +1,16 @@
+{
+  "interaction_id": "33f49562-8102-451b-92e4-3061f908d49e",
+  "index_name": "schemes_index",
+  "status": "success",
+  "results": [
+    {
+      "document_id": "doc-7b9c11fc",
+      "document_name": "Viksit Krishi- Chennamsetti Gopinath Entry.pdf",
+      "status": "success",
+      "chunks_created": 7,
+      "chunks_inserted": 7,
+      "validation_passed": true
+    }
+  ],
+  "hash_key": "a07f04c68c46b73c"
+}

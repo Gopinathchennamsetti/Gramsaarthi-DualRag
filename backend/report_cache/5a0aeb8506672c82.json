@@ -1,0 +1,63 @@
+{
+  "interaction_id": "7d692584-35a4-4fc6-bac4-ba1333bd5d57",
+  "question": "what is intellidoc",
+  "final_answer": "IntelliDoc is not a government scheme for citizens, but rather an AI-powered framework developed by the Ministry of Finance in Telangana. Its primary purpose is to help organizations, including government departments, manage and process large amounts of unstructured documents efficiently. It uses advanced technologies like Natural Language Processing (NLP), Machine Learning (ML), and Large Language Models (LLMs) to automatically ingest, clean, and organize documents. IntelliDoc works by grouping similar documents together, removing duplicates, and creating a single, consolidated version of related information. This makes it easier to find documents, saves storage space, ensures compliance, and speeds up decision-making. While it's a tool for organizations, its benefits can indirectly reach citizens through improved government services.",
+  "eligibility": "IntelliDoc is a framework for organizations and government departments, not for individual citizens. Therefore, there are no eligibility criteria for citizens to apply for or use IntelliDoc directly.",
+  "benefits": [
+    "Automated document ingestion, cleaning, and organization",
+    "Improved document retrieval and search capabilities",
+    "Reduced storage needs through consolidation of information",
+    "Enhanced compliance and data accuracy",
+    "Faster decision-making processes for organizations"
+  ],
+  "how_to_apply": [
+    "IntelliDoc is a framework for organizations, not a scheme for citizens to apply for.",
+    "Government departments or organizations interested in using IntelliDoc would need to engage with the Ministry of Finance in Telangana for implementation."
+  ],
+  "documents_required": [
+    "Not applicable as IntelliDoc is a framework for organizations, not a citizen-facing scheme."
+  ],
+  "practical_tips": [
+    "IntelliDoc leverages AI techniques like TF-IDF, Affinity Propagation clustering, and GPT-3.5 Turbo for its operations.",
+    "The system offers visualizations to help users understand document groupings and verify consolidation quality.",
+    "It includes robust error handling to ensure reliable document processing."
+  ],
+  "helpline": "Information regarding a specific helpline for IntelliDoc is not publicly available. For inquiries related to its implementation within government, one might need to contact the Ministry of Finance, Telangana.",
+  "schemes_covered": [
+    "IntelliDoc (Framework for Organizations)"
+  ],
+  "confidence_score": 0.9,
+  "intermediate": {
+    "scheme_answer": {
+      "answer": "The provided official scheme documents for Ayushman Bharat do not contain any information about 'intellidoc'. Therefore, it is not possible to answer what 'intellidoc' is based on the given text.",
+      "scheme_names": [
+        "Ayushman Bharat"
+      ],
+      "eligibility_summary": "Not applicable as the query term was not found in the documents.",
+      "key_benefits": [],
+      "sources": []
+    },
+    "citizen_answer": {
+      "answer": "IntelliDoc is an AI-powered framework developed by the Ministry of Finance in Telangana. It is designed to help organizations manage large volumes of unstructured documents. IntelliDoc automates the process of ingesting, cleaning, and organizing these documents by using Natural Language Processing (NLP), Machine Learning (ML), and Large Language Models (LLMs). It achieves this by converting raw documents into meaningful clusters based on their semantic similarity, removing redundant content, and consolidating related information into clean, single versions. This helps in improving document retrieval, reducing storage needs, ensuring compliance, and speeding up decision-making.",
+      "common_confusions": [
+        "Is IntelliDoc a government scheme for citizens or for businesses/organizations?",
+        "What kind of documents can IntelliDoc process?",
+        "How does IntelliDoc differ from traditional document management systems?"
+      ],
+      "practical_tips": [
+        "IntelliDoc uses AI techniques like TF-IDF, Affinity Propagation clustering, and GPT-3.5 Turbo for its operations.",
+        "The system provides visualizations to help users understand how documents are grouped and to verify the quality of the consolidation.",
+        "IntelliDoc includes robust error handling for reliable processing of documents."
+      ],
+      "related_questions": [
+        "How does IntelliDoc group similar documents?",
+        "What is the role of AI and LLMs in IntelliDoc?",
+        "How does IntelliDoc handle duplicate or redundant information in documents?"
+      ]
+    },
+    "scheme_docs_retrieved": 8,
+    "citizen_docs_retrieved": 8,
+    "processing_time_seconds": 8.23
+  },
+  "hash_key": "5a0aeb8506672c82"
+}
