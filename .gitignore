@@ -1,5 +1,6 @@
 .venv/
 backend/.venv/
+backend/data/users.sqlite3
 
 # Keep only app-used output artifacts
 outputs/*

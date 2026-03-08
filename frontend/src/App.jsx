@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const API = "http://3.235.76.236";
+const API = (import.meta.env.VITE_API_BASE_URL || "http://3.235.76.236").replace(/\/$/, "");
 
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -1447,7 +1447,7 @@ const LoginPage = ({ onLogin }) => {
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ width: 52, height: 52, background: "linear-gradient(135deg,#0f766e,#2aa294)", borderRadius: 12,
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 14px" }}>⟁</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: "#1a2333", letterSpacing: "0.08em" }}>Climate & Scheme Intelligence</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#1a2333", letterSpacing: "0.08em" }}>Gramsaarthi</div>
           <div style={{ fontSize: 11, color: "#46566c", letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 4 }}>Gram Panchayat Dashboard</div>
         </div>
 

@@ -28,6 +28,7 @@ import json
 import hashlib
 import logging
 import html
+import sqlite3
 from io import BytesIO
 import textwrap
 import time
@@ -81,6 +82,7 @@ _dynamodb_table    = None
 SECRET_KEY           = os.getenv("SECRET_KEY", "change-me-in-production-32-chars!!")
 ALGORITHM            = "HS256"
 TOKEN_EXPIRE_MINUTES = 60 * 8
+USERS_DB_PATH        = _HERE / "data" / "users.sqlite3"
 
 # ── Import execution.py and ingestion.py ──────────────────────────────────────
 try:
@@ -127,21 +129,71 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 pwd_ctx = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2  = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-# In-memory user store — replace with DB in production
-USERS: dict = {}
+def _db_conn() -> sqlite3.Connection:
+    USERS_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(USERS_DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-def _seed():
+def _user_from_row(row: Optional[sqlite3.Row]) -> Optional[dict]:
+    if row is None:
+        return None
+    return {
+        "username": row["username"],
+        "password_hash": row["password_hash"],
+        "role": row["role"],
+        "name": row["name"],
+        "district": row["district"] or "",
+        "mandal": row["mandal"] or "",
+        "gp": row["gp"] or "",
+    }
+
+def _get_user(username: str) -> Optional[dict]:
+    with _db_conn() as conn:
+        row = conn.execute(
+            "SELECT username, password_hash, role, name, district, mandal, gp FROM users WHERE username = ?",
+            (username,),
+        ).fetchone()
+    return _user_from_row(row)
+
+def _create_user(username: str, password_hash: str, role: str, name: str, district: str = "", mandal: str = "", gp: str = "") -> None:
+    with _db_conn() as conn:
+        conn.execute(
+            """
+            INSERT INTO users (username, password_hash, role, name, district, mandal, gp)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (username, password_hash, role, name, district, mandal, gp),
+        )
+        conn.commit()
+
+def _init_users_db() -> None:
+    with _db_conn() as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                username TEXT PRIMARY KEY,
+                password_hash TEXT NOT NULL,
+                role TEXT NOT NULL,
+                name TEXT NOT NULL,
+                district TEXT DEFAULT '',
+                mandal TEXT DEFAULT '',
+                gp TEXT DEFAULT '',
+                created_at INTEGER DEFAULT (strftime('%s', 'now'))
+            )
+            """
+        )
+        conn.commit()
+
     for username, role, district, mandal, gp, name in [
-        ("district_demo",  "district_officer",  "Nalgonda", "",            "",            "Ravi Kumar"),
+        ("district_demo", "district_officer", "Nalgonda", "", "", "Ravi Kumar"),
         ("panchayat_demo", "panchayat_officer", "Nalgonda", "Miryalaguda", "Ananthagiri", "Sita Devi"),
-        ("citizen_demo",   "citizen",           "Nalgonda", "Miryalaguda", "Ananthagiri", "Arjun"),
+        ("citizen_demo", "citizen", "Nalgonda", "Miryalaguda", "Ananthagiri", "Arjun"),
     ]:
-        USERS[username] = {
-            "password_hash": pwd_ctx.hash("demo1234"),
-            "role": role, "name": name,
-            "district": district, "mandal": mandal, "gp": gp,
-        }
-_seed()
+        if _get_user(username) is None:
+            _create_user(username, pwd_ctx.hash("demo1234"), role, name, district, mandal, gp)
+
+_init_users_db()
 
 class RegisterRequest(BaseModel):
     username: str
@@ -156,42 +208,47 @@ def make_token(username: str) -> str:
     exp = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_MINUTES)
     return jwt.encode({"sub": username, "exp": exp}, SECRET_KEY, algorithm=ALGORITHM)
 
-def user_payload(username: str) -> dict:
-    u = USERS[username]
-    return {"username": username, "role": u["role"], "name": u["name"],
+def user_payload(u: dict) -> dict:
+    return {"username": u["username"], "role": u["role"], "name": u["name"],
             "district": u["district"], "mandal": u["mandal"], "gp": u["gp"]}
 
 def get_current_user(token: str = Depends(oauth2)) -> dict:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
-        if not username or username not in USERS:
+        u = _get_user(username) if username else None
+        if not u:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
-        return user_payload(username)
+        return user_payload(u)
     except JWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
 
 @app.post("/api/auth/register")
 def register(req: RegisterRequest):
-    if req.username in USERS:
+    if _get_user(req.username):
         raise HTTPException(400, "Username already exists")
     if req.role not in ("district_officer", "panchayat_officer", "citizen"):
         raise HTTPException(400, "Invalid role")
-    USERS[req.username] = {
-        "password_hash": pwd_ctx.hash(req.password),
-        "role": req.role, "name": req.name,
-        "district": req.district, "mandal": req.mandal, "gp": req.gp,
-    }
+    _create_user(
+        req.username,
+        pwd_ctx.hash(req.password),
+        req.role,
+        req.name,
+        req.district,
+        req.mandal,
+        req.gp,
+    )
+    u = _get_user(req.username)
     return {"access_token": make_token(req.username), "token_type": "bearer",
-            "user": user_payload(req.username)}
+            "user": user_payload(u)}
 
 @app.post("/api/auth/login")
 def login(form: OAuth2PasswordRequestForm = Depends()):
-    u = USERS.get(form.username)
+    u = _get_user(form.username)
     if not u or not pwd_ctx.verify(form.password, u["password_hash"]):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
     return {"access_token": make_token(form.username), "token_type": "bearer",
-            "user": user_payload(form.username)}
+            "user": user_payload(u)}
 
 @app.get("/api/auth/me")
 def me(user=Depends(get_current_user)):
@@ -204,7 +261,10 @@ def me(user=Depends(get_current_user)):
 def load_csv(name: str) -> pd.DataFrame:
     path = OUTPUTS / name
     if not path.exists():
-        raise HTTPException(404, f"{name} not found — run core ML modules first")
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            f"Required dataset '{name}' is missing in '{OUTPUTS}'. Generate outputs and retry.",
+        )
     df = pd.read_csv(path, low_memory=False)
     for col in ["District", "Mandal"]:
         if col in df.columns:
@@ -426,7 +486,10 @@ def get_alerts(user=Depends(get_current_user)):
 def get_kpis(user=Depends(get_current_user)):
     path = DASHBOARD / "core_kpis.json"
     if not path.exists():
-        raise HTTPException(404, "KPIs not found — run module3_dashboard.py first")
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            f"Required KPI file is missing at '{path}'. Generate outputs and retry.",
+        )
     with open(path) as f:
         return json.load(f)
 
