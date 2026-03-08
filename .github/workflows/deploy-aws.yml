@@ -84,9 +84,16 @@ jobs:
               exit 1
             fi
             cd /opt/dualrag_app_web
+            ENV_BAK="$(mktemp)"
+            if [ -f backend/.env ]; then
+              cp backend/.env "$ENV_BAK"
+            fi
             git fetch origin main
             git checkout main
-            git pull origin main
+            git reset --hard origin/main
+            if [ -s "$ENV_BAK" ]; then
+              cp "$ENV_BAK" backend/.env
+            fi
             source .venv/bin/activate
             pip install -r backend/requirements.txt -r backend/requirements_pipeline.txt
             sudo systemctl restart dualrag-backend
