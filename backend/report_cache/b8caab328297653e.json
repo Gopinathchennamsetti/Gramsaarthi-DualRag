@@ -1,0 +1,49 @@
+{
+  "interaction_id": "e59992ac-93f2-4aa6-99bb-c0cf48e8fc0d",
+  "question": "Am I eligible for Ayushman Bharat in my village?",
+  "final_answer": "[MOCK] execution.py not loaded. Demo answer for: 'Am I eligible for Ayushman Bharat in my village?'.",
+  "eligibility": "Families in SECC 2011 database with annual income below ₹2.5 lakh.",
+  "benefits": [
+    "Annual coverage up to ₹5 lakh",
+    "Cashless hospitalisation",
+    "1,949 procedures covered"
+  ],
+  "how_to_apply": [
+    "Visit pmjay.gov.in",
+    "Go to nearest CSC",
+    "Bring Aadhaar + Ration Card"
+  ],
+  "documents_required": [
+    "Aadhaar Card",
+    "Ration Card"
+  ],
+  "practical_tips": [
+    "Enrolment is FREE",
+    "Save helpline 14555"
+  ],
+  "helpline": "14555 | pmjay.gov.in",
+  "schemes_covered": [
+    "Ayushman Bharat PM-JAY"
+  ],
+  "confidence_score": 0.0,
+  "intermediate": {
+    "scheme_answer": {
+      "answer": "Mock",
+      "scheme_names": [],
+      "eligibility_summary": "",
+      "key_benefits": [],
+      "sources": []
+    },
+    "citizen_answer": {
+      "answer": "Mock",
+      "common_confusions": [],
+      "practical_tips": [],
+      "related_questions": []
+    },
+    "scheme_docs_retrieved": 0,
+    "citizen_docs_retrieved": 0,
+    "processing_time_seconds": 0.0
+  },
+  "hash_key": "b8caab328297653e",
+  "_mock": true
+}

@@ -3,12 +3,17 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // ── Config ────────────────────────────────────────────────────────────────────
 // Empty string = use Vite proxy (vite.config.js proxies /api → localhost:8080)
 // Change to "http://localhost:8080" if running frontend without Vite dev server
-const API = "http://3.235.76.236";
+const API = "http://localhost:8080";
 
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 const api = async (path, opts = {}) => {
-  const res = await fetch(`${API}${path}`, opts);
+  const token = sessionStorage.getItem("dash_token");
+  const headers = {
+    ...(opts.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  const res = await fetch(`${API}${path}`, { ...opts, headers });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   return res.json();
 };
@@ -877,9 +882,13 @@ const ExecutionPage = ({ toast }) => {
   const downloadReport = async (format = "html") => {
     if (!report) return;
     try {
+      const token = sessionStorage.getItem("dash_token");
       const res = await fetch(`${API}/api/report/download`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ report, format }),
       });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
@@ -1082,7 +1091,6 @@ const IngestionPage = ({ toast }) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [modal, setModal] = useState(null);
-  const [pendingSubmit, setPendingSubmit] = useState(false);
   const fileRef = useRef();
 
   const handleFileDrop = (f) => {
@@ -1113,8 +1121,14 @@ const IngestionPage = ({ toast }) => {
       fd.append("metadata_json", JSON.stringify(buildMeta()));
       fd.append("force", force ? "true" : "false");
 
-      const res = await fetch(`${API}/api/ingest`, { method: "POST", body: fd });
+      const token = sessionStorage.getItem("dash_token");
+      const res = await fetch(`${API}/api/ingest`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: fd,
+      });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || `${res.status} ${res.statusText}`);
       setResult(data);
       toast(data._cached ? "Document already ingested (cached)" : "Ingestion complete!", "ok");
     } catch (e) {
@@ -1131,9 +1145,9 @@ const IngestionPage = ({ toast }) => {
       const check = await api("/api/ingest/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, index_name: indexName, document_type: docType, filters: buildMeta() }),
+        body: JSON.stringify({ filename: file.name, index_name: indexName, document_type: docType, metadata: buildMeta() }),
       });
-      if (check.exists && !pendingSubmit) {
+      if (check.exists) {
         setResult(check.result);
         setModal({ filename: file.name });
         return;
@@ -1314,46 +1328,828 @@ const IngestionPage = ({ toast }) => {
   );
 };
 
-// ── Main App ──────────────────────────────────────────────────────────────────
-export default function App() {
-  const [page, setPage] = useState("execution");
-  const [health, setHealth] = useState(null);
-  const [indexStats, setIndexStats] = useState(null);
-  const [toast, setToast] = useState(null);
 
+// ══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD EXTENSION — Auth + Role-based pages
+// ══════════════════════════════════════════════════════════════════════════════
+
+const DASH_API = API;  // same server, same port
+
+const dash = async (path, opts = {}) => {
+  const token = sessionStorage.getItem("dash_token");
+  const headers = { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(opts.headers || {}) };
+  const res = await fetch(`${DASH_API}${path}`, { ...opts, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+};
+
+// ── Role config ────────────────────────────────────────────────────────────────
+const ROLES = {
+  district_officer:  { label: "District Officer",  color: "#0f766e", bg: "rgba(15,118,110,0.1)",  icon: "🏛", desc: "Full district-wide access, all GPs, ML metrics, ingestion" },
+  panchayat_officer: { label: "Panchayat Officer", color: "#b57a2a", bg: "rgba(181,122,42,0.1)",  icon: "🏘", desc: "Your GP's detailed schemes, funds, activities" },
+  citizen:           { label: "Citizen",            color: "#46566c", bg: "rgba(70,86,108,0.1)",   icon: "👤", desc: "Your village's alerts, scheme eligibility, weather outlook" },
+};
+
+const NAV_BY_ROLE = {
+  district_officer:  ["prediction","recommend","analysis","execution","ingestion"],
+  panchayat_officer: ["prediction","recommend","analysis","execution","ingestion"],
+  citizen:           ["alerts","schemes","weather"],
+};
+
+const NAV_LABELS = {
+  prediction: "🌧 Prediction", recommend: "📋 Recommend", analysis: "📊 Analysis",
+  execution: "⟡ Query", ingestion: "⊕ Ingest",
+  alerts: "🚨 Alerts", schemes: "📋 Schemes", weather: "🌤 Weather",
+};
+
+// ── Auth context (simple — no React context, just props) ───────────────────────
+
+// ── Component: RoleBadge ───────────────────────────────────────────────────────
+const RoleBadge = ({ role }) => {
+  const r = ROLES[role] || {};
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20,
+      fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+      background: r.bg, color: r.color, border: `1px solid ${r.color}44` }}>
+      {r.icon} {r.label}
+    </span>
+  );
+};
+
+// ── Component: LoginPage ───────────────────────────────────────────────────────
+const LoginPage = ({ onLogin }) => {
+  const [mode, setMode] = useState("login");  // login | register
+  const [form, setForm] = useState({ username:"", password:"", name:"", role:"citizen", district:"", mandal:"", gp:"" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError]   = useState("");
+  // Jurisdiction dropdowns for register
+  const [regDistricts, setRegDistricts] = useState([]);
+  const [regMandals,   setRegMandals]   = useState([]);
+  const [regGps,       setRegGps]       = useState([]);
+
+  useEffect(() => {
+    fetch(`${DASH_API}/api/public/districts`).then(r => r.json()).then(setRegDistricts).catch(() => {});
+  }, []);
+
+  const pickRegDistrict = async (d) => {
+    setForm(p => ({ ...p, district: d, mandal: "", gp: "" }));
+    setRegMandals([]); setRegGps([]);
+    if (d) {
+      const ms = await fetch(`${DASH_API}/api/public/mandals?district=${encodeURIComponent(d)}`).then(r=>r.json()).catch(()=>[]);
+      setRegMandals(ms);
+    }
+  };
+  const pickRegMandal = async (m) => {
+    setForm(p => ({ ...p, mandal: m, gp: "" }));
+    setRegGps([]);
+    if (m && form.district) {
+      const gs = await fetch(`${DASH_API}/api/public/gps?district=${encodeURIComponent(form.district)}&mandal=${encodeURIComponent(m)}`).then(r=>r.json()).catch(()=>[]);
+      setRegGps(gs);
+    }
+  };
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const submit = async () => {
+    setError(""); setLoading(true);
+    try {
+      let data;
+      if (mode === "login") {
+        const fd = new FormData();
+        fd.append("username", form.username); fd.append("password", form.password);
+        const res = await fetch(`${DASH_API}/api/auth/login`, { method: "POST", body: fd });
+        if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.detail || "Login failed"); }
+        data = await res.json();
+      } else {
+        data = await dash("/api/auth/register", { method: "POST", body: JSON.stringify(form) });
+      }
+      sessionStorage.setItem("dash_token", data.access_token);
+      onLogin(data.user);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const needsJurisdiction = mode === "register" && form.role !== "";
+  const isPanchayat = form.role === "panchayat_officer";
+  const isCitizen   = form.role === "citizen";
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(145deg, #ecf7ff, #f8f2e8)",
+      display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" , position: "relative", overflow: "hidden" }}>
+      {/* Background orbs */}
+      <div style={{ ...S.bgOrb, ...S.orb1 }} /><div style={{ ...S.bgOrb, ...S.orb2 }} />
+      <div style={{ width: "100%", maxWidth: 1200, position: "relative", zIndex: 1 }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ width: 52, height: 52, background: "linear-gradient(135deg,#0f766e,#2aa294)", borderRadius: 12,
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, margin: "0 auto 14px" }}>⟁</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#1a2333", letterSpacing: "0.08em" }}>Climate & Scheme Intelligence</div>
+          <div style={{ fontSize: 11, color: "#46566c", letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 4 }}>Gram Panchayat Dashboard</div>
+        </div>
+
+        <div style={S.card}>
+          {/* Mode toggle */}
+          <div style={{ display: "flex", borderRadius: 6, overflow: "hidden", border: "1px solid #c7dcd7", marginBottom: 30 }}>
+            {["login","register"].map(m => (
+              <button key={m} onClick={() => { setMode(m); setError(""); }}
+                style={{ flex: 1, padding: "9px 0", border: "none", cursor: "pointer", fontFamily: "inherit",
+                  fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", transition: "all 0.15s",
+                  background: mode === m ? "linear-gradient(135deg,#2aa294,#0f766e)" : "#f8f2e8",
+                  color: mode === m ? "#fff" : "#46566c" }}>
+                {m === "login" ? "Sign In" : "Register"}
+              </button>
+            ))}
+          </div>
+
+          {/* Demo credentials hint */}
+          {mode === "login" && (
+            <div style={{ background: "#f8f2e8", border: "1px solid #c7dcd7", borderRadius: 6, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: "#46566c", lineHeight: 1.8 }}>
+              <strong style={{ color: "#1a2333" }}>Demo accounts</strong><br />
+              🏛 <code>district_demo</code> / <code>demo1234</code> — District Officer<br />
+              🏘 <code>panchayat_demo</code> / <code>demo1234</code> — Panchayat Officer<br />
+              👤 <code>citizen_demo</code> / <code>demo1234</code> — Citizen
+            </div>
+          )}
+
+          {/* Fields */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={S.label}>Username</label>
+            <input style={S.input} value={form.username} onChange={e => set("username", e.target.value)} placeholder="Enter username" autoFocus />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={S.label}>Password</label>
+            <input style={S.input} type="password" value={form.password} onChange={e => set("password", e.target.value)} placeholder="Enter password"
+              onKeyDown={e => { if (e.key === "Enter") submit(); }} />
+          </div>
+
+          {mode === "register" && (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <label style={S.label}>Full Name</label>
+                <input style={S.input} value={form.name} onChange={e => set("name", e.target.value)} placeholder="Your full name" />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={S.label}>Role</label>
+                <select style={S.select} value={form.role} onChange={e => {
+                  setForm(p => ({ ...p, role: e.target.value, mandal: "", gp: "" }));
+                  setRegMandals([]); setRegGps([]);
+                }}>
+                  {Object.entries(ROLES).map(([k,v]) => <option key={k} value={k}>{v.icon} {v.label}</option>)}
+                </select>
+                <div style={{ fontSize: 11, color: "#46566c", marginTop: 6 }}>{ROLES[form.role]?.desc}</div>
+              </div>
+              {/* Jurisdiction */}
+              <div style={{ paddingTop: 12, borderTop: "1px solid #c7dcd7", marginBottom: 14 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#46566c", marginBottom: 12 }}>Jurisdiction</div>
+                <div style={{ marginBottom: 12 }}>
+                  <label style={S.label}>District</label>
+                  <select style={S.select} value={form.district} onChange={e => pickRegDistrict(e.target.value)}>
+                    <option value="">— Select District —</option>
+                    {regDistricts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                {(isPanchayat || isCitizen) && (
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={S.label}>Mandal</label>
+                    <select style={{ ...S.select, opacity: !form.district ? 0.6 : 1 }} value={form.mandal} onChange={e => pickRegMandal(e.target.value)} disabled={!form.district}>
+                      <option value="">— Select Mandal —</option>
+                      {regMandals.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                )}
+                {(isPanchayat || isCitizen) && (
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={S.label}>Gram Panchayat</label>
+                    <select style={{ ...S.select, opacity: !form.mandal ? 0.6 : 1 }} value={form.gp} onChange={e => setForm(p => ({ ...p, gp: e.target.value }))} disabled={!form.mandal}>
+                      <option value="">— Select GP —</option>
+                      {regGps.map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                  </div>
+                )}
+                {/* District officer only needs district, no mandal/GP */}
+                {form.role === "district_officer" && form.district && (
+                  <div style={{ fontSize: 11, color: "#0f766e", padding: "6px 10px", background: "rgba(15,118,110,0.06)", borderRadius: 6 }}>
+                    ✓ You will have access to all mandals and GPs in <strong>{form.district}</strong>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {error && (
+            <div style={{ background: "#fff1ef", border: "1px solid #cfa6a2", borderRadius: 6, padding: "10px 14px", color: "#b43c36", fontSize: 12, marginBottom: 14 }}>
+              ⚠ {error}
+            </div>
+          )}
+
+          <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", opacity: loading ? 0.6 : 1 }}
+            disabled={loading} onClick={submit}>
+            {loading ? <Spinner size={16} /> : null}
+            {loading ? "Please wait…" : mode === "login" ? "Sign In" : "Create Account"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Component: HierarchySelector ──────────────────────────────────────────────
+const HierarchySelector = ({ user, onChange }) => {
+  const [districts, setDistricts] = useState([]);
+  const [mandals, setMandals]     = useState([]);
+  const [gps, setGps]             = useState([]);
+  const [sel, setSel]             = useState({ district: user.district || "", mandal: user.mandal || "", gp: user.gp || "" });
+  const locked = user.role !== "district_officer";  // panchayat/citizen locked to their jurisdiction
+
+  useEffect(() => {
+    dash("/api/hierarchy/districts").then(d => {
+      setDistricts(d);
+      if (d.length === 1) {
+        const auto = { district: d[0], mandal: user.mandal || "", gp: user.gp || "" };
+        setSel(auto);
+        onChange(auto);
+        dash(`/api/hierarchy/mandals?district=${encodeURIComponent(d[0])}`).then(ms => {
+          setMandals(ms);
+          if (ms.length === 1) {
+            const auto2 = { ...auto, mandal: ms[0] };
+            setSel(auto2); onChange(auto2);
+            dash(`/api/hierarchy/gps?district=${encodeURIComponent(d[0])}&mandal=${encodeURIComponent(ms[0])}`).then(gs => {
+              setGps(gs);
+              if (gs.length === 1) { const a3 = { ...auto2, gp: gs[0] }; setSel(a3); onChange(a3); }
+            }).catch(() => {});
+          }
+        }).catch(() => {});
+      }
+    }).catch(() => {});
+  }, []);
+
+  const pickDistrict = async (d) => {
+    const next = { district: d, mandal: "", gp: "" }; setSel(next); setMandals([]); setGps([]); onChange(next);
+    if (d) { const ms = await dash(`/api/hierarchy/mandals?district=${encodeURIComponent(d)}`).catch(()=>[]); setMandals(ms); }
+  };
+  const pickMandal = async (m) => {
+    const next = { ...sel, mandal: m, gp: "" }; setSel(next); setGps([]); onChange(next);
+    if (m) { const gs = await dash(`/api/hierarchy/gps?district=${encodeURIComponent(sel.district)}&mandal=${encodeURIComponent(m)}`).catch(()=>[]); setGps(gs); }
+  };
+  const pickGp = (g) => { const next = { ...sel, gp: g }; setSel(next); onChange(next); };
+
+  const ss = { ...S.select, fontSize: 12, opacity: locked ? 0.85 : 1 };
+  return (
+    <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end", marginBottom: 20 }}>
+      <div style={{ minWidth: 180 }}>
+        <label style={S.label}>District</label>
+        <select style={ss} value={sel.district} onChange={e => pickDistrict(e.target.value)} disabled={locked && districts.length === 1}>
+          <option value="">All Districts</option>
+          {districts.map(d => <option key={d}>{d}</option>)}
+        </select>
+      </div>
+      <div style={{ minWidth: 180 }}>
+        <label style={S.label}>Mandal</label>
+        <select style={ss} value={sel.mandal} onChange={e => pickMandal(e.target.value)} disabled={!sel.district || (locked && mandals.length === 1)}>
+          <option value="">All Mandals</option>
+          {mandals.map(m => <option key={m}>{m}</option>)}
+        </select>
+      </div>
+      <div style={{ minWidth: 180 }}>
+        <label style={S.label}>Gram Panchayat</label>
+        <select style={ss} value={sel.gp} onChange={e => pickGp(e.target.value)} disabled={!sel.mandal || (locked && gps.length === 1)}>
+          <option value="">All GPs</option>
+          {gps.map(g => <option key={g}>{g}</option>)}
+        </select>
+      </div>
+      {locked && (
+        <div style={{ fontSize: 10, color: "#46566c", padding: "6px 10px", background: "#f8f2e8", borderRadius: 6, border: "1px solid #c7dcd7" }}>
+          🔒 Scoped to your jurisdiction
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── MiniBar helper ─────────────────────────────────────────────────────────────
+const MiniBar = ({ value, max, color = "#0f766e" }) => (
+  <div style={{ width: "100%", height: 8, background: "#edf2f0", borderRadius: 4, overflow: "hidden" }}>
+    <div style={{ width: `${Math.min(100, (value / Math.max(max, 1)) * 100)}%`, height: "100%", background: color, borderRadius: 4, transition: "width 0.4s" }} />
+  </div>
+);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ROLE-BASED PAGES
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Page: Prediction (District Officer + Panchayat Officer) ───────────────────
+const PredictionPage = ({ user, toast }) => {
+  const [sel, setSel] = useState({ district: user.district || "", mandal: user.mandal || "", gp: user.gp || "" });
+  const [data, setData]     = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = async (s) => {
+    setLoading(true);
+    try {
+      const qs = new URLSearchParams();
+      if (s.district) qs.set("district", s.district);
+      if (s.mandal)   qs.set("mandal",   s.mandal);
+      if (s.gp)       qs.set("gp",       s.gp);
+      setData(await dash(`/api/prediction?${qs}`));
+    } catch (e) { toast(e.message, "error"); } finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(sel); }, []);
+
+  const isPanchayat = user.role === "panchayat_officer";
+
+  return (
+    <div>
+      <div style={S.sectionTitle}><span>🌧</span><span>Climate Predictions</span><div style={S.sectionLine} /></div>
+      <div style={S.card}>
+        <HierarchySelector user={user} onChange={s => { setSel(s); load(s); }} />
+        {loading && <div style={{ display: "flex", gap: 10, alignItems: "center", color: "#46566c", fontSize: 13 }}><Spinner size={16} /> Loading…</div>}
+        {data && !loading && (
+          <>
+            <div style={{ ...S.grid3, marginBottom: 20 }}>
+              {[
+                { label: "Mandals", val: data.predictions.length },
+                { label: "Drought Forecast", val: data.predictions.filter(p => p.predicted_drought_flag === "DROUGHT").length },
+                { label: "Avg Rainfall (mm)", val: data.predictions.length ? (data.predictions.reduce((a, p) => a + (p.predicted_rainfall_mm || 0), 0) / data.predictions.length).toFixed(1) : "–" },
+              ].map(({ label, val }) => <div key={label} style={S.statBox}><div style={S.statNum}>{val}</div><div style={S.statLabel}>{label}</div></div>)}
+            </div>
+
+            {/* Panchayat officer: show GP detail card */}
+            {isPanchayat && data.gp_context?.length > 0 && (
+              <div style={{ ...S.cardAccent, marginBottom: 20 }}>
+                <div style={S.reportSectionTitle}>Your GP — Detailed Context</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                  {[
+                    { k: "water_activities", l: "Water Activities" },
+                    { k: "livelihood_activities", l: "Livelihood Activities" },
+                    { k: "total_estimated_cost_lakhs", l: "Est. Cost (Lakhs)" },
+                    { k: "sc_st_fund_share_pct", l: "SC/ST Fund %" },
+                    { k: "priority_score", l: "Priority Score" },
+                    { k: "priority_tier", l: "Priority Tier" },
+                  ].map(({ k, l }) => (
+                    <div key={k} style={S.statBox}>
+                      <div style={{ ...S.statNum, fontSize: 18 }}>{data.gp_context[0]?.[k] ?? "–"}</div>
+                      <div style={S.statLabel}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr style={{ background: "#f8f2e8" }}>
+                    {["District","Mandal","Month","Rainfall (mm)","Drought %","Forecast",
+                      ...(isPanchayat ? [] : ["Drought Score"])
+                    ].map(h => <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "#46566c", borderBottom: "1px solid #c7dcd7" }}>{h}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.predictions.map((p, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #edf2f0" }}>
+                      <td style={{ padding: "8px 12px", color: "#1a2333" }}>{p.District}</td>
+                      <td style={{ padding: "8px 12px", color: "#38526f" }}>{p.Mandal}</td>
+                      <td style={{ padding: "8px 12px", color: "#46566c" }}>{p.forecast_year}-{String(p.forecast_month||"").padStart(2,"0")}</td>
+                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "#0f766e" }}>{p.predicted_rainfall_mm}</td>
+                      <td style={{ padding: "8px 12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <div style={{ width: 50, height: 6, background: "#edf2f0", borderRadius: 3, overflow: "hidden" }}>
+                            <div style={{ width: `${p.drought_probability_pct||0}%`, height: "100%", background: (p.drought_probability_pct||0) > 50 ? "#ef4444" : "#0f766e", borderRadius: 3 }} />
+                          </div>
+                          <span style={{ fontSize: 11 }}>{p.drought_probability_pct}%</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: "8px 12px" }}><span style={{ ...S.badge(p.predicted_drought_flag === "DROUGHT" ? "amber" : "green"), fontSize: 9 }}>{p.predicted_drought_flag}</span></td>
+                      {!isPanchayat && <td style={{ padding: "8px 12px", color: "#46566c", fontSize: 11 }}>{p.drought_risk_score ?? "–"}</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {data.predictions.length === 0 && <div style={{ padding: 24, textAlign: "center", color: "#46566c", fontSize: 13 }}>No data for this selection.</div>}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Page: Recommend (District + Panchayat) ────────────────────────────────────
+const RecommendPage = ({ user, toast }) => {
+  const [sel, setSel]       = useState({ district: user.district||"", mandal: user.mandal||"", gp: user.gp||"" });
+  const [data, setData]     = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = async (s) => {
+    setLoading(true);
+    try {
+      const qs = new URLSearchParams();
+      if (s.district) qs.set("district", s.district);
+      if (s.mandal)   qs.set("mandal",   s.mandal);
+      if (s.gp)       qs.set("gp",       s.gp);
+      qs.set("top_k", "20");
+      setData(await dash(`/api/recommend?${qs}`));
+    } catch (e) { toast(e.message, "error"); } finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(sel); }, []);
+
+  const isPanchayat = user.role === "panchayat_officer";
+  const tierColor = { CRITICAL: "amber", HIGH: "blue", MEDIUM: "green", LOW: "gray" };
+
+  return (
+    <div>
+      <div style={S.sectionTitle}><span>📋</span><span>Scheme Recommendations</span><div style={S.sectionLine} /></div>
+      <div style={S.card}>
+        <HierarchySelector user={user} onChange={s => { setSel(s); load(s); }} />
+        {loading && <div style={{ display: "flex", gap: 10, alignItems: "center", color: "#46566c", fontSize: 13 }}><Spinner size={16} /> Loading…</div>}
+        {data && !loading && (
+          <>
+            <div style={{ fontSize: 11, color: "#46566c", marginBottom: 16 }}>Showing <strong>{data.total}</strong> recommendation(s)</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {data.recommendations.map((r, i) => (
+                <div key={i} style={{ ...S.cardAccent, marginBottom: 0, padding: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1a2333", marginBottom: 4 }}>{r["Scheme Name"]}</div>
+                      <div style={{ fontSize: 11, color: "#46566c" }}>{r.District && `${r.District} › `}{r.Mandal && `${r.Mandal} › `}{r.GP_Name}</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {r.priority_tier && <span style={S.badge(tierColor[r.priority_tier]||"gray")}>{r.priority_tier}</span>}
+                      {r.recommendation_score && <span style={S.badge("blue")}>Score: {r.recommendation_score}</span>}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
+                    {r.theme    && <span style={{ fontSize: 11, color: "#38526f" }}>🏷 {r.theme}</span>}
+                    {r.sector   && <span style={{ fontSize: 11, color: "#38526f" }}>📂 {r.sector}</span>}
+                    {r.rationale && <span style={{ fontSize: 11, color: "#0f766e", fontStyle: "italic" }}>✦ {r.rationale}</span>}
+                  </div>
+                  {/* Panchayat officer sees activity count + cost */}
+                  {isPanchayat && (r.activity_count != null || r.avg_estimated_cost != null) && (
+                    <div style={{ display: "flex", gap: 20, marginTop: 10, paddingTop: 10, borderTop: "1px solid #edf2f0" }}>
+                      {r.activity_count  != null && <span style={{ fontSize: 11, color: "#46566c" }}>Activities: <strong>{r.activity_count}</strong></span>}
+                      {r.avg_estimated_cost != null && <span style={{ fontSize: 11, color: "#46566c" }}>Avg Cost: <strong>₹{(r.avg_estimated_cost/1000).toFixed(1)}K</strong></span>}
+                      {r.water_relevance    === 1 && <span style={S.badge("blue")}>💧 Water</span>}
+                      {r.drought_relevance  === 1 && <span style={S.badge("amber")}>🌵 Drought</span>}
+                      {r.livelihood_relevance===1 && <span style={S.badge("green")}>🌾 Livelihood</span>}
+                      {r.inclusion_relevance===1 && <span style={S.badge("gray")}>👥 Inclusion</span>}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {data.recommendations.length === 0 && <div style={{ padding: 24, textAlign: "center", color: "#46566c", fontSize: 13 }}>No recommendations for this selection.</div>}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Page: Analysis (District + Panchayat) ─────────────────────────────────────
+const AnalysisPage = ({ user, toast }) => {
+  const [sel, setSel]       = useState({ district: user.district||"", mandal: user.mandal||"", gp: user.gp||"" });
+  const [data, setData]     = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = async (s) => {
+    setLoading(true);
+    try {
+      const qs = new URLSearchParams();
+      if (s.district) qs.set("district", s.district);
+      if (s.mandal)   qs.set("mandal",   s.mandal);
+      if (s.gp)       qs.set("gp",       s.gp);
+      setData(await dash(`/api/analysis?${qs}`));
+    } catch (e) { toast(e.message, "error"); } finally { setLoading(false); }
+  };
+
+  useEffect(() => { load(sel); }, []);
+
+  const tierColors = { CRITICAL:"#b43c36", HIGH:"#b57a2a", MEDIUM:"#0f766e", LOW:"#6f8092" };
+  const riskColors = { Critical:"#b43c36", High:"#b57a2a", Medium:"#0f766e", Low:"#6f8092" };
+  const isDistrict  = user.role === "district_officer";
+  const isPanchayat = user.role === "panchayat_officer";
+
+  return (
+    <div>
+      <div style={S.sectionTitle}><span>📊</span><span>Analysis & Insights</span><div style={S.sectionLine} /></div>
+      <div style={{ ...S.card, marginBottom: 16 }}>
+        <HierarchySelector user={user} onChange={s => { setSel(s); load(s); }} />
+      </div>
+      {loading && <div style={{ display: "flex", gap: 10, alignItems: "center", color: "#46566c", fontSize: 13, padding: 24 }}><Spinner size={16} /> Loading…</div>}
+      {data && !loading && (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
+            {[{ label: "Total GPs", val: data.summary.total_gps }, { label: "Critical GPs", val: data.summary.critical_gps },
+              { label: "Drought Mandals", val: data.summary.drought_mandals }, { label: "Avg Rainfall mm", val: data.summary.avg_rainfall_mm }
+            ].map(({ label, val }) => <div key={label} style={S.statBox}><div style={S.statNum}>{val}</div><div style={S.statLabel}>{label}</div></div>)}
+          </div>
+
+          <div style={{ ...S.grid2, marginBottom: 20 }}>
+            <div style={S.card}>
+              <div style={S.reportSectionTitle}>GP Priority Tier Distribution</div>
+              {data.tier_distribution.map(({ tier, count }) => (
+                <div key={tier} style={{ marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                    <span style={{ color: tierColors[tier]||"#46566c", fontWeight: 600 }}>{tier}</span>
+                    <span style={{ color: "#46566c" }}>{count}</span>
+                  </div>
+                  <MiniBar value={count} max={Math.max(...data.tier_distribution.map(t=>t.count))} color={tierColors[tier]||"#0f766e"} />
+                </div>
+              ))}
+            </div>
+            <div style={S.card}>
+              <div style={S.reportSectionTitle}>Drought Risk Distribution</div>
+              {data.risk_distribution.map(({ bucket, count }) => (
+                <div key={bucket} style={{ marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                    <span style={{ color: riskColors[bucket]||"#46566c", fontWeight: 600 }}>{bucket}</span>
+                    <span style={{ color: "#46566c" }}>{count}</span>
+                  </div>
+                  <MiniBar value={count} max={Math.max(...data.risk_distribution.map(r=>r.count))} color={riskColors[bucket]||"#0f766e"} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ ...S.grid2, marginBottom: 20 }}>
+            <div style={S.card}>
+              <div style={S.reportSectionTitle}>Monthly Rainfall Trend (Last 24 months)</div>
+              {data.monthly_rainfall_trend.length > 0 ? (
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 100 }}>
+                  {(() => {
+                    const vals = data.monthly_rainfall_trend.map(t=>t.total_rain_mm||0);
+                    const maxV = Math.max(...vals, 1);
+                    return data.monthly_rainfall_trend.map((t, i) => (
+                      <div key={i} title={`${t.label}: ${(t.total_rain_mm||0).toFixed(1)} mm`}
+                        style={{ flex:1, background:"#0f766e", opacity:0.5+0.5*((t.total_rain_mm||0)/maxV), borderRadius:"2px 2px 0 0",
+                          height:`${Math.max(2,((t.total_rain_mm||0)/maxV)*90)}px`, transition:"height 0.3s" }} />
+                    ));
+                  })()}
+                </div>
+              ) : <div style={{ color: "#46566c", fontSize: 12 }}>No trend data.</div>}
+              <div style={{ fontSize: 10, color: "#46566c", marginTop: 6 }}>Hover bars for values</div>
+            </div>
+            <div style={S.card}>
+              <div style={S.reportSectionTitle}>Top Mandals by Priority Score</div>
+              {data.top_mandals_by_priority.map(({ Mandal, priority_score }, i) => (
+                <div key={Mandal} style={{ marginBottom: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
+                    <span style={{ color: "#1a2333" }}>{i+1}. {Mandal}</span>
+                    <span style={{ color: "#0f766e", fontWeight: 600 }}>{(priority_score||0).toFixed(1)}</span>
+                  </div>
+                  <MiniBar value={priority_score||0} max={100} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* District officer: cross-mandal comparison table */}
+          {isDistrict && data.mandal_comparison?.length > 0 && (
+            <div style={S.card}>
+              <div style={S.reportSectionTitle}>Cross-Mandal Comparison</div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead><tr style={{ background: "#f8f2e8" }}>
+                    {["Mandal","GPs","Critical GPs","Avg Priority Score","Total Budget (Lakhs)"].map(h => (
+                      <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#46566c", borderBottom: "1px solid #c7dcd7" }}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {data.mandal_comparison.map((m, i) => (
+                      <tr key={i} style={{ borderBottom: "1px solid #edf2f0" }}>
+                        <td style={{ padding: "8px 12px", fontWeight: 600, color: "#1a2333" }}>{m.Mandal}</td>
+                        <td style={{ padding: "8px 12px", color: "#46566c" }}>{m.gps}</td>
+                        <td style={{ padding: "8px 12px" }}><span style={{ color: m.critical > 0 ? "#b43c36" : "#056b5a", fontWeight: 600 }}>{m.critical}</span></td>
+                        <td style={{ padding: "8px 12px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ width: 60, height: 6, background: "#edf2f0", borderRadius: 3, overflow: "hidden" }}>
+                              <div style={{ width: `${m.avg_score||0}%`, height: "100%", background: "#0f766e", borderRadius: 3 }} />
+                            </div>
+                            <span style={{ fontSize: 11 }}>{(m.avg_score||0).toFixed(1)}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: "8px 12px", color: "#46566c" }}>{(m.total_cost_lakhs||0).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Panchayat officer: GP activity breakdown */}
+          {isPanchayat && data.gp_activity_detail?.length > 0 && (
+            <div style={S.card}>
+              <div style={S.reportSectionTitle}>GP Activity Breakdown</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                {[
+                  { k:"total_activities", l:"Total Activities" }, { k:"water_activities", l:"Water Activities" },
+                  { k:"livelihood_activities", l:"Livelihood Activities" }, { k:"total_estimated_cost_lakhs", l:"Est. Cost (Lakhs)" },
+                  { k:"sc_st_fund_share_pct", l:"SC/ST Fund %" }, { k:"priority_score", l:"Priority Score" },
+                ].map(({ k, l }) => (
+                  <div key={k} style={S.statBox}>
+                    <div style={{ ...S.statNum, fontSize: 20 }}>{data.gp_activity_detail[0]?.[k] ?? "–"}</div>
+                    <div style={S.statLabel}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+// ── Page: Citizen — Alerts ─────────────────────────────────────────────────────
+const CitizenAlertsPage = ({ user, toast }) => {
+  const [data, setData]     = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    dash("/api/alerts").then(setData).catch(e => toast(e.message, "error")).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ display: "flex", gap: 10, alignItems: "center", padding: 40, color: "#46566c" }}><Spinner /> Loading alerts for your area…</div>;
+
+  return (
+    <div>
+      <div style={S.sectionTitle}><span>🚨</span><span>Drought Alerts — Your Area</span><div style={S.sectionLine} /></div>
+      <div style={{ ...S.card, marginBottom: 20, background: "rgba(255,249,240,0.9)", borderColor: "#e8c88a" }}>
+        <div style={{ fontSize: 12, color: "#5a4010", lineHeight: 1.8 }}>
+          <strong>📍 Your location:</strong> {user.gp || user.mandal || user.district || "—"}<br />
+          These alerts are based on ML predictions using rainfall and humidity data from your region.
+        </div>
+      </div>
+      {data?.alerts?.length === 0 ? (
+        <div style={{ ...S.card, textAlign: "center", padding: 40 }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+          <div style={{ fontSize: 15, color: "#056b5a", fontWeight: 600 }}>No drought alerts for your area</div>
+          <div style={{ fontSize: 12, color: "#46566c", marginTop: 6 }}>Rainfall is expected to be normal next month.</div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {(data?.alerts || []).map((a, i) => (
+            <div key={i} style={{ ...S.card, borderLeft: "3px solid #b57a2a", background: "rgba(255,249,240,0.95)", marginBottom: 0, padding: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#1a2333", marginBottom: 6 }}>⚠ {a.alert_message}</div>
+                  <div style={{ fontSize: 11, color: "#46566c" }}>Expected rainfall: <strong>{a.predicted_rainfall_mm} mm</strong></div>
+                </div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: "#b43c36" }}>{a.drought_probability_pct}%</div>
+                  <div style={{ fontSize: 10, color: "#46566c", textTransform: "uppercase", letterSpacing: "0.1em" }}>Drought risk</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Page: Citizen — Schemes ────────────────────────────────────────────────────
+const CitizenSchemesPage = ({ user, toast }) => {
+  const [data, setData]     = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const qs = new URLSearchParams();
+    if (user.district) qs.set("district", user.district);
+    if (user.mandal)   qs.set("mandal",   user.mandal);
+    if (user.gp)       qs.set("gp",       user.gp);
+    qs.set("top_k", "20");
+    dash(`/api/recommend?${qs}`).then(setData).catch(e => toast(e.message, "error")).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ display: "flex", gap: 10, alignItems: "center", padding: 40, color: "#46566c" }}><Spinner /> Loading schemes…</div>;
+
+  return (
+    <div>
+      <div style={S.sectionTitle}><span>📋</span><span>Schemes for Your Village</span><div style={S.sectionLine} /></div>
+      <div style={{ ...S.card, marginBottom: 20, background: "rgba(240,250,245,0.9)", borderColor: "#9ddccf" }}>
+        <div style={{ fontSize: 12, color: "#1a3a2a", lineHeight: 1.8 }}>
+          These schemes are recommended for <strong>{user.gp || user.mandal || user.district}</strong> based on current climate conditions and local needs.
+          Contact your Gram Panchayat office to apply.
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {(data?.recommendations || []).map((r, i) => (
+          <div key={i} style={{ ...S.card, marginBottom: 0, padding: 18, borderLeft: "3px solid #0f766e" }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: "#1a2333", marginBottom: 6 }}>{r["Scheme Name"]}</div>
+            {r.theme    && <div style={{ fontSize: 12, color: "#46566c", marginBottom: 4 }}>🏷 Category: {r.theme}</div>}
+            {r.rationale && <div style={{ fontSize: 12, color: "#0f766e" }}>✦ Why recommended: {r.rationale}</div>}
+          </div>
+        ))}
+        {!data?.recommendations?.length && <div style={{ padding: 40, textAlign: "center", color: "#46566c" }}>No schemes found for your area.</div>}
+      </div>
+    </div>
+  );
+};
+
+// ── Page: Citizen — Weather ────────────────────────────────────────────────────
+const CitizenWeatherPage = ({ user, toast }) => {
+  const [data, setData]     = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const qs = new URLSearchParams();
+    if (user.district) qs.set("district", user.district);
+    if (user.mandal)   qs.set("mandal",   user.mandal);
+    dash(`/api/prediction?${qs}`).then(setData).catch(e => toast(e.message, "error")).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ display: "flex", gap: 10, alignItems: "center", padding: 40, color: "#46566c" }}><Spinner /> Loading weather outlook…</div>;
+
+  const preds = data?.predictions || [];
+
+  return (
+    <div>
+      <div style={S.sectionTitle}><span>🌤</span><span>Weather Outlook — Next Month</span><div style={S.sectionLine} /></div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {preds.map((p, i) => {
+          const isDrought = p.predicted_drought_flag === "DROUGHT";
+          return (
+            <div key={i} style={{ ...S.card, marginBottom: 0, padding: 20, background: isDrought ? "rgba(255,249,235,0.95)" : "rgba(240,252,246,0.95)", borderLeft: `3px solid ${isDrought ? "#b57a2a" : "#0f766e"}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#1a2333", marginBottom: 4 }}>{p.Mandal}</div>
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>{isDrought ? "☀️ Dry conditions expected" : "🌧 Rainfall expected"}</div>
+                  <div style={{ fontSize: 12, color: "#38526f", lineHeight: 1.8 }}>{p.advice}</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 28, fontWeight: 700, color: "#0f766e" }}>{p.predicted_rainfall_mm}<span style={{ fontSize: 13, fontWeight: 400 }}>mm</span></div>
+                  <div style={{ fontSize: 10, color: "#46566c" }}>Expected rainfall</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {preds.length === 0 && <div style={{ padding: 40, textAlign: "center", color: "#46566c" }}>No weather data available.</div>}
+      </div>
+    </div>
+  );
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ══════════════════════════════════════════════════════════════════════════════
+export default function App() {
+  const [user, setUser]   = useState(() => {
+    try { const t = sessionStorage.getItem("dash_token"); const u = sessionStorage.getItem("dash_user"); return t && u ? JSON.parse(u) : null; } catch { return null; }
+  });
+  const [page, setPage]   = useState(null);  // null = auto-select first nav item
+  const [health, setHealth]     = useState(null);
+  const [toast, setToast] = useState(null);
   const showToast = useCallback((msg, type = "ok") => setToast({ msg, type, id: Date.now() }), []);
+
+  const handleLogin = (u) => {
+    sessionStorage.setItem("dash_user", JSON.stringify(u));
+    setUser(u);
+    setPage(null);
+  };
+  const handleLogout = () => {
+    sessionStorage.removeItem("dash_token");
+    sessionStorage.removeItem("dash_user");
+    setUser(null); setPage(null);
+  };
 
   useEffect(() => {
     api("/api/health").then(setHealth).catch(() => setHealth({ status: "unreachable" }));
-    api("/api/indexes/stats").then(setIndexStats).catch(() => {});
   }, []);
 
+  if (!user) return <LoginPage onLogin={handleLogin} />;
+
+  const navItems = NAV_BY_ROLE[user.role] || [];
+  const activePage = page || navItems[0];
   const isOk = health?.status === "healthy";
+  const roleInfo = ROLES[user.role] || {};
 
   return (
     <div style={S.app}>
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-          background: linear-gradient(145deg, #ecf7ff, #f8f2e8);
-          font-family: "Segoe UI", "Trebuchet MS", "Helvetica Neue", sans-serif;
-        }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes drift {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(10px); }
-        }
-        input:focus, textarea:focus, select:focus { border-color: #0f766e !important; }
-        button:hover { opacity: 0.88; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f8f2e8; }
-        ::-webkit-scrollbar-thumb { background: #c7dcd7; border-radius: 3px; }
-        select option { background: #ffffff; }
+        body { background: linear-gradient(145deg, #ecf7ff, #f8f2e8); font-family: "Segoe UI","Trebuchet MS","Helvetica Neue",sans-serif; }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes drift { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(10px)} }
+        input:focus,textarea:focus,select:focus{border-color:#0f766e!important}
+        button:hover{opacity:0.88}
+        ::-webkit-scrollbar{width:6px;height:6px}
+        ::-webkit-scrollbar-track{background:#f8f2e8}
+        ::-webkit-scrollbar-thumb{background:#c7dcd7;border-radius:3px}
+        select option{background:#ffffff}
       `}</style>
-      <div style={{ ...S.bgOrb, ...S.orb1 }} />
-      <div style={{ ...S.bgOrb, ...S.orb2 }} />
+      <div style={{ ...S.bgOrb, ...S.orb1 }} /><div style={{ ...S.bgOrb, ...S.orb2 }} />
 
-      {/* Header */}
       <header style={S.header}>
         <div style={S.headerBrand}>
           <div style={S.logo}>⟁</div>
@@ -1364,32 +2160,45 @@ export default function App() {
         </div>
 
         <nav style={S.nav}>
-          {["execution", "ingestion"].map(p => (
-            <button key={p} style={S.navBtn(page === p)} onClick={() => setPage(p)}>
-              {p === "execution" ? "⟡ Query" : "⊕ Ingest"}
-            </button>
+          {navItems.map(id => (
+            <button key={id} style={S.navBtn(activePage === id)} onClick={() => setPage(id)}>{NAV_LABELS[id]}</button>
           ))}
         </nav>
 
         <div style={S.statusRow}>
-          {indexStats && (
-            <>
-              <span style={S.badge("blue")}><Icon.Database />{indexStats.schemes_index_count} schemes</span>
-              <span style={S.badge("green")}><Icon.Database />{indexStats.citizen_faq_index_count} faqs</span>
-            </>
-          )}
+
+          {/* User info pill */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 10px",
+            background: roleInfo.bg, border: `1px solid ${roleInfo.color}44`, borderRadius: 20 }}>
+            <span style={{ fontSize: 13 }}>{roleInfo.icon}</span>
+            <span style={{ fontSize: 11, color: roleInfo.color, fontWeight: 600 }}>{user.name || user.username}</span>
+          </div>
           <div style={S.statusDot(isOk)} />
-          <span style={{ fontSize: 10 }}>{isOk ? "API Online" : "API Offline"}</span>
+          <button onClick={handleLogout} style={{ ...S.btnSecondary, padding: "4px 10px", fontSize: 10 }}>Sign Out</button>
         </div>
       </header>
 
-      {/* Main */}
       <main style={S.main}>
-        {page === "execution" && <ExecutionPage toast={showToast} />}
-        {page === "ingestion" && <IngestionPage toast={showToast} />}
+        {/* District Officer pages */}
+        {user.role === "district_officer" && activePage === "prediction" && <PredictionPage user={user} toast={showToast} />}
+        {user.role === "district_officer" && activePage === "recommend"  && <RecommendPage  user={user} toast={showToast} />}
+        {user.role === "district_officer" && activePage === "analysis"   && <AnalysisPage   user={user} toast={showToast} />}
+        {user.role === "district_officer" && activePage === "execution"  && <ExecutionPage  toast={showToast} />}
+        {user.role === "district_officer" && activePage === "ingestion"  && <IngestionPage  toast={showToast} />}
+
+        {/* Panchayat Officer pages */}
+        {user.role === "panchayat_officer" && activePage === "prediction" && <PredictionPage user={user} toast={showToast} />}
+        {user.role === "panchayat_officer" && activePage === "recommend"  && <RecommendPage  user={user} toast={showToast} />}
+        {user.role === "panchayat_officer" && activePage === "analysis"   && <AnalysisPage   user={user} toast={showToast} />}
+        {/* ADD THESE */}
+        {user.role === "panchayat_officer" && activePage === "execution"  && <ExecutionPage  toast={showToast} />}
+        {user.role === "panchayat_officer" && activePage === "ingestion"  && <IngestionPage  toast={showToast} />}
+        {/* Citizen pages */}
+        {user.role === "citizen" && activePage === "alerts"  && <CitizenAlertsPage  user={user} toast={showToast} />}
+        {user.role === "citizen" && activePage === "schemes" && <CitizenSchemesPage user={user} toast={showToast} />}
+        {user.role === "citizen" && activePage === "weather" && <CitizenWeatherPage user={user} toast={showToast} />}
       </main>
 
-      {/* Toast */}
       {toast && <Toast key={toast.id} msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );

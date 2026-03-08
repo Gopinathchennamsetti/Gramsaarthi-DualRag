@@ -1,0 +1,16 @@
+{
+  "interaction_id": "08c37eef-7390-4b98-9b22-b8f24f796942",
+  "index_name": "schemes_index",
+  "status": "success",
+  "results": [
+    {
+      "document_id": "doc-f9c51f17",
+      "document_name": "GramSaarthi_AWS_Deployment_Guide.pdf",
+      "status": "success",
+      "chunks_created": 4,
+      "chunks_inserted": 4,
+      "validation_passed": true
+    }
+  ],
+  "hash_key": "bbb31eacf9b5dea0"
+}
