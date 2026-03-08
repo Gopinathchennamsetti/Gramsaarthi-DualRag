@@ -1078,6 +1078,23 @@ const ExecutionPage = ({ toast }) => {
 
 // ── Page: Ingestion ───────────────────────────────────────────────────────────
 const IngestionPage = ({ toast }) => {
+  const SAMPLE_DOCS = [
+    {
+      label: "PM KISAN Generic Brief",
+      href: "/sample-docs/schemes_index/PM_KISAN_Generic_Brief.pdf",
+      indexName: "schemes_index",
+      docType: "official_guidelines",
+      schemeType: "agriculture",
+    },
+    {
+      label: "PM KISAN Citizen FAQ",
+      href: "/sample-docs/citizen_faq_index/PM_KISAN_Citizen_FAQ.pdf",
+      indexName: "citizen_faq_index",
+      docType: "citizen_faq",
+      schemeType: "agriculture",
+    },
+  ];
+
   const [file, setFile] = useState(null);
   const [indexName, setIndexName] = useState("schemes_index");
   const [docType, setDocType] = useState("official_guidelines");
@@ -1180,6 +1197,34 @@ const IngestionPage = ({ toast }) => {
       </div>
 
       <div style={S.card}>
+        <div style={{ marginBottom: 16, padding: 12, border: "1px solid #c7dcd7", borderRadius: 8, background: "#f8f2e8" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#46566c", marginBottom: 8 }}>
+            Sample Documents
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {SAMPLE_DOCS.map((d) => (
+              <div key={d.href} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <a href={d.href} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#0f766e", textDecoration: "underline" }}>
+                  {d.label}
+                </a>
+                <button
+                  type="button"
+                  style={{ ...S.btnSecondary, padding: "4px 10px", fontSize: 10 }}
+                  onClick={() => {
+                    setIndexName(d.indexName);
+                    setDocType(d.docType);
+                    setSchemeType(d.schemeType);
+                    setSchemeName(d.label);
+                    toast(`Configured form for ${d.label}`, "ok");
+                  }}
+                >
+                  Use for Ingestion
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Dropzone */}
         <div
           style={S.dropzone(drag)}
