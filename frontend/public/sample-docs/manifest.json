@@ -1,0 +1,25 @@
+{
+  "documents": [
+    { "title": "DigitalIndia Generic Brief", "href": "/sample-docs/schemes_index/DigitalIndia_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "PMAY Generic Brief", "href": "/sample-docs/schemes_index/PMAY_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "PMJDY Generic Brief", "href": "/sample-docs/schemes_index/PMJDY_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "PMJAY Generic Brief", "href": "/sample-docs/schemes_index/PMJAY_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "PMMY Generic Brief", "href": "/sample-docs/schemes_index/PMMY_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "PM KISAN Generic Brief", "href": "/sample-docs/schemes_index/PM_KISAN_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "PMUY Generic Brief", "href": "/sample-docs/schemes_index/PMUY_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "SBM Generic Brief", "href": "/sample-docs/schemes_index/SBM_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "SkillIndia Generic Brief", "href": "/sample-docs/schemes_index/SkillIndia_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+    { "title": "StartupIndia Generic Brief", "href": "/sample-docs/schemes_index/StartupIndia_Generic_Brief.pdf", "indexName": "schemes_index", "docType": "official_guidelines" },
+
+    { "title": "DigitalIndia Citizen FAQ", "href": "/sample-docs/citizen_faq_index/DigitalIndia_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "PMAY Citizen FAQ", "href": "/sample-docs/citizen_faq_index/PMAY_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "PMJDY Citizen FAQ", "href": "/sample-docs/citizen_faq_index/PMJDY_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "PMJAY Citizen FAQ", "href": "/sample-docs/citizen_faq_index/PMJAY_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "PMMY Citizen FAQ", "href": "/sample-docs/citizen_faq_index/PMMY_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "PM KISAN Citizen FAQ", "href": "/sample-docs/citizen_faq_index/PM_KISAN_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "PMUY Citizen FAQ", "href": "/sample-docs/citizen_faq_index/PMUY_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "SBM Citizen FAQ", "href": "/sample-docs/citizen_faq_index/SBM_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "SkillIndia Citizen FAQ", "href": "/sample-docs/citizen_faq_index/SkillIndia_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" },
+    { "title": "StartupIndia Citizen FAQ", "href": "/sample-docs/citizen_faq_index/StartupIndia_Citizen_FAQ.pdf", "indexName": "citizen_faq_index", "docType": "citizen_faq" }
+  ]
+}

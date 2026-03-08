@@ -71,6 +71,11 @@ const Icon = {
       <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
     </svg>
   ),
+  Download: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{width:16,height:16}}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  ),
 };
 
 // ── CSS-in-JS styles ──────────────────────────────────────────────────────────
@@ -1078,23 +1083,6 @@ const ExecutionPage = ({ toast }) => {
 
 // ── Page: Ingestion ───────────────────────────────────────────────────────────
 const IngestionPage = ({ toast }) => {
-  const SAMPLE_DOCS = [
-    {
-      label: "PM KISAN Generic Brief",
-      href: "/sample-docs/schemes_index/PM_KISAN_Generic_Brief.pdf",
-      indexName: "schemes_index",
-      docType: "official_guidelines",
-      schemeType: "agriculture",
-    },
-    {
-      label: "PM KISAN Citizen FAQ",
-      href: "/sample-docs/citizen_faq_index/PM_KISAN_Citizen_FAQ.pdf",
-      indexName: "citizen_faq_index",
-      docType: "citizen_faq",
-      schemeType: "agriculture",
-    },
-  ];
-
   const [file, setFile] = useState(null);
   const [indexName, setIndexName] = useState("schemes_index");
   const [docType, setDocType] = useState("official_guidelines");
@@ -1197,34 +1185,6 @@ const IngestionPage = ({ toast }) => {
       </div>
 
       <div style={S.card}>
-        <div style={{ marginBottom: 16, padding: 12, border: "1px solid #c7dcd7", borderRadius: 8, background: "#f8f2e8" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#46566c", marginBottom: 8 }}>
-            Sample Documents
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {SAMPLE_DOCS.map((d) => (
-              <div key={d.href} style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                <a href={d.href} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#0f766e", textDecoration: "underline" }}>
-                  {d.label}
-                </a>
-                <button
-                  type="button"
-                  style={{ ...S.btnSecondary, padding: "4px 10px", fontSize: 10 }}
-                  onClick={() => {
-                    setIndexName(d.indexName);
-                    setDocType(d.docType);
-                    setSchemeType(d.schemeType);
-                    setSchemeName(d.label);
-                    toast(`Configured form for ${d.label}`, "ok");
-                  }}
-                >
-                  Use for Ingestion
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Dropzone */}
         <div
           style={S.dropzone(drag)}
@@ -1371,6 +1331,82 @@ const IngestionPage = ({ toast }) => {
   );
 };
 
+const ResourcesPage = () => {
+  const [docs, setDocs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("/sample-docs/manifest.json");
+        const data = await res.json();
+        if (mounted) setDocs(Array.isArray(data.documents) ? data.documents : []);
+      } catch (_) {
+        if (mounted) setDocs([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const groups = docs.reduce((acc, d) => {
+    const key = d.indexName || "other";
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(d);
+    return acc;
+  }, {});
+
+  return (
+    <div>
+      <div style={{ ...S.sectionTitle, marginBottom: 16 }}>
+        <Icon.File />
+        <span>Resources</span>
+        <div style={S.sectionLine} />
+      </div>
+
+      <div style={S.cardAccent}>
+        <div style={{ fontSize: 12, color: "#46566c", marginBottom: 12 }}>
+          Download sample scheme documents and use them for testing ingestion/query workflows.
+        </div>
+        {loading ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#5f7488", fontSize: 12 }}>
+            <Spinner size={14} /> Loading resources...
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {Object.entries(groups).map(([indexName, list]) => (
+              <div key={indexName}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#46566c", marginBottom: 8 }}>
+                  {indexName}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {list.map((d) => (
+                    <div key={d.href} style={{ ...S.card, marginBottom: 0 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#1a2333" }}>{d.title}</div>
+                          <div style={{ fontSize: 11, color: "#5f7488", marginTop: 4 }}>
+                            Index: {d.indexName} | Type: {d.docType}
+                          </div>
+                        </div>
+                        <a href={d.href} target="_blank" rel="noreferrer" style={{ ...S.btnSecondary, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                          <Icon.Download /> Open PDF
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DASHBOARD EXTENSION — Auth + Role-based pages
@@ -1397,15 +1433,15 @@ const ROLES = {
 };
 
 const NAV_BY_ROLE = {
-  district_officer:  ["prediction","recommend","analysis","execution","ingestion"],
-  panchayat_officer: ["prediction","recommend","analysis","execution","ingestion"],
-  citizen:           ["alerts","schemes","weather"],
+  district_officer:  ["prediction","recommend","analysis","execution","ingestion","resources"],
+  panchayat_officer: ["prediction","recommend","analysis","execution","ingestion","resources"],
+  citizen:           ["alerts","schemes","weather","resources"],
 };
 
 const NAV_LABELS = {
   prediction: "🌧 Prediction", recommend: "📋 Recommend", analysis: "📊 Analysis",
   execution: "⟡ Query", ingestion: "⊕ Ingest",
-  alerts: "🚨 Alerts", schemes: "📋 Schemes", weather: "🌤 Weather",
+  alerts: "🚨 Alerts", schemes: "📋 Schemes", weather: "🌤 Weather", resources: "📚 Resources",
 };
 
 const PAGE_HELP_LABELS = {
@@ -1417,6 +1453,7 @@ const PAGE_HELP_LABELS = {
   alerts: "Drought Alerts",
   schemes: "Village Schemes",
   weather: "Weather Outlook",
+  resources: "Resources",
 };
 
 // ── Auth context (simple — no React context, just props) ───────────────────────
@@ -2336,6 +2373,7 @@ export default function App() {
         {user.role === "district_officer" && activePage === "analysis"   && <AnalysisPage   user={user} toast={showToast} />}
         {user.role === "district_officer" && activePage === "execution"  && <ExecutionPage  toast={showToast} />}
         {user.role === "district_officer" && activePage === "ingestion"  && <IngestionPage  toast={showToast} />}
+        {user.role === "district_officer" && activePage === "resources"  && <ResourcesPage />}
 
         {/* Panchayat Officer pages */}
         {user.role === "panchayat_officer" && activePage === "prediction" && <PredictionPage user={user} toast={showToast} />}
@@ -2344,10 +2382,12 @@ export default function App() {
         {/* ADD THESE */}
         {user.role === "panchayat_officer" && activePage === "execution"  && <ExecutionPage  toast={showToast} />}
         {user.role === "panchayat_officer" && activePage === "ingestion"  && <IngestionPage  toast={showToast} />}
+        {user.role === "panchayat_officer" && activePage === "resources"  && <ResourcesPage />}
         {/* Citizen pages */}
         {user.role === "citizen" && activePage === "alerts"  && <CitizenAlertsPage  user={user} toast={showToast} />}
         {user.role === "citizen" && activePage === "schemes" && <CitizenSchemesPage user={user} toast={showToast} />}
         {user.role === "citizen" && activePage === "weather" && <CitizenWeatherPage user={user} toast={showToast} />}
+        {user.role === "citizen" && activePage === "resources" && <ResourcesPage />}
       </main>
 
       <PageAssistant activePage={activePage} toast={showToast} />
