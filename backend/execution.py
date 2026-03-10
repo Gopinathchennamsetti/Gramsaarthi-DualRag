@@ -88,27 +88,36 @@ class ConfigManager:
 config = ConfigManager()
 
 
-# ── Startup validation: catch missing API keys immediately ────────────────────
-def _validate_env():
-    provider = config.get('llm.provider', 'openai')
+def _provider_key_requirements(provider: str):
     key_map = {
         'openai':  ('OPENAI_API_KEY',  'https://platform.openai.com/api-keys'),
         'gemini':  ('GEMINI_API_KEY',  'https://ai.google.dev/gemini-api/docs/api-key'),
     }
-    if provider in key_map:
-        env_var, url = key_map[provider]
+    return key_map.get(provider)
+
+def _missing_key_message(provider: str, env_var: str, url: str) -> str:
+    return (
+        f"\n\n{'='*60}\n"
+        f"  MISSING API KEY: {env_var}\n"
+        f"  Provider '{provider}' is selected in config.json but\n"
+        f"  {env_var} is not set in your .env file.\n\n"
+        f"  Fix:\n"
+        f"    1. Open backend/.env and set:  {env_var}=your-key-here\n"
+        f"    2. Get a key at: {url}\n"
+        f"{'='*60}\n"
+    )
+
+def ensure_llm_env(provider: Optional[str] = None) -> None:
+    """
+    Non-fatal at import time: we want the API server to start even if keys are missing.
+    Fatal at runtime: query/ingest should fail fast with a clear message.
+    """
+    provider = (provider or config.get('llm.provider', 'openai')).strip().lower()
+    req = _provider_key_requirements(provider)
+    if req:
+        env_var, url = req
         if not os.getenv(env_var):
-            raise EnvironmentError(
-                f"\n\n{'='*60}\n"
-                f"  MISSING API KEY: {env_var}\n"
-                f"  Provider '{provider}' is selected in config.json but\n"
-                f"  {env_var} is not set in your .env file.\n\n"
-                f"  Fix:\n"
-                f"    1. Copy .env.template → .env  (if you haven't already)\n"
-                f"    2. Open .env and set:  {env_var}=your-key-here\n"
-                f"    3. Get a key at: {url}\n"
-                f"{'='*60}\n"
-            )
+            raise RuntimeError(_missing_key_message(provider, env_var, url))
     elif provider == 'bedrock':
         if not os.getenv('AWS_ACCESS_KEY_ID') and not os.getenv('AWS_PROFILE'):
             logger.warning(
@@ -116,7 +125,15 @@ def _validate_env():
                 "Set AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY or configure an AWS profile."
             )
 
-_validate_env()
+def _startup_env_check() -> None:
+    provider = (config.get('llm.provider', 'openai') or 'openai').strip().lower()
+    req = _provider_key_requirements(provider)
+    if req:
+        env_var, url = req
+        if not os.getenv(env_var):
+            logger.warning(_missing_key_message(provider, env_var, url))
+
+_startup_env_check()
 
 
 # (same provider dispatch, same Gemini client style, same local fallback)
@@ -170,6 +187,7 @@ class EmbeddingProvider:
 
     # ── Main entry with fallback — mirrors ingestion_pipeline.py ─────────────
     async def embed_texts(self, texts: List[str]) -> List[List[float]]:
+        ensure_llm_env(self.provider)
         try:
             if self.provider == 'openai':
                 return await self._embed_openai(texts)
@@ -256,6 +274,7 @@ class LLMProvider:
         self._bedrock_client = None
 
     async def chat(self, system_prompt: str, user_prompt: str) -> str:
+        ensure_llm_env(self.provider)
         if self.provider == 'openai':
             return await self._chat_openai(system_prompt, user_prompt)
         elif self.provider == 'gemini':

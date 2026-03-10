@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const API = (import.meta.env.VITE_API_BASE_URL || "http://3.235.76.236").replace(/\/$/, "");
+// In local dev, prefer same-origin so Vite's `/api` proxy forwards to the backend.
+// In production builds, keep the historical remote default unless overridden.
+const DEFAULT_REMOTE_API = "http://3.235.76.236";
+const envApiBase = import.meta.env.VITE_API_BASE_URL;
+const API = ((envApiBase !== undefined ? envApiBase : (import.meta.env.DEV ? "" : DEFAULT_REMOTE_API)) || "")
+  .replace(/\/$/, "");
 
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
