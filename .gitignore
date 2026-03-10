@@ -1,6 +1,22 @@
 .venv/
 backend/.venv/
 backend/data/users.sqlite3
+backend/.env
+
+# Python cache
+__pycache__/
+backend/__pycache__/
+*.pyc
+
+# Local vector DB / runtime artifacts
+backend/chroma_db/
+chroma_db/
+backend/report_cache/
+backend/uploads/
+
+# Frontend deps/build artifacts
+frontend/node_modules/
+frontend/dist/
 
 # Keep only app-used output artifacts
 outputs/*

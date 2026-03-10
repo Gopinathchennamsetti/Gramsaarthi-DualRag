@@ -126,6 +126,14 @@ except Exception as exc:
     exec_config = None
 
 try:
+    from langgraph_execution import DualRAGGraphExecutor
+    logger.info("✅  langgraph_execution.py imported OK")
+    LANGGRAPH_AVAILABLE = True
+except Exception as exc:
+    logger.warning(f"⚠   langgraph_execution.py import failed: {exc}")
+    LANGGRAPH_AVAILABLE = False
+
+try:
     from ingestion import IngestionPipeline
     logger.info("✅  ingestion.py imported OK")
     INGESTION_AVAILABLE = True
@@ -135,12 +143,21 @@ except Exception as exc:
 
 _processor         = None
 _ingestion_pipeline = None
+_graph_executor    = None
 
 def get_processor():
     global _processor
     if _processor is None:
         _processor = DualRAGProcessor()
     return _processor
+
+def get_graph_executor():
+    global _graph_executor
+    if not LANGGRAPH_AVAILABLE:
+        raise RuntimeError("LangGraph executor is not available (import failed)")
+    if _graph_executor is None:
+        _graph_executor = DualRAGGraphExecutor()
+    return _graph_executor
 
 def get_ingestion_pipeline():
     global _ingestion_pipeline
@@ -910,6 +927,8 @@ async def health():
     return {
         "status": overall,
         "execution_available": EXECUTION_AVAILABLE,
+        "langgraph_available": LANGGRAPH_AVAILABLE,
+        "default_rag_engine": "langgraph" if LANGGRAPH_AVAILABLE else "legacy",
         "ingestion_available": INGESTION_AVAILABLE,
         "llm_provider": exec_config.get("llm.provider") if exec_config else "unknown",
         "vector_store": exec_config.get("vector_store.type") if exec_config else "unknown",
@@ -966,8 +985,20 @@ async def execute_report(request: Request, user=Depends(get_current_user)):
     body = await request.json()
     question = body.get("question","").strip()
     if not question: raise HTTPException(400, "question is required")
-    filters = body.get("filters",{}); options = body.get("options",{}); force = body.get("force",False)
-    hash_key = compute_query_hash(question, filters, options)
+    filters = body.get("filters",{})
+    options = body.get("options",{})
+    force = body.get("force",False)
+
+    # Choose execution engine:
+    # - default: LangGraph when available (requested migration)
+    # - override per-request: options.engine = "legacy" | "langgraph"
+    engine = (options.get("engine") or ("langgraph" if LANGGRAPH_AVAILABLE else "legacy")).strip().lower()
+    if engine not in {"legacy", "langgraph"}:
+        raise HTTPException(400, "options.engine must be 'legacy' or 'langgraph'")
+
+    # Include engine in hash to avoid cache collisions across executors.
+    options_for_hash = {**options, "engine": engine}
+    hash_key = compute_query_hash(question, filters, options_for_hash)
     if not force:
         cached = load_cache(hash_key)
         if cached: return {**cached, "_cached": True, "hash_key": hash_key}
@@ -976,13 +1007,33 @@ async def execute_report(request: Request, user=Depends(get_current_user)):
         save_cache(hash_key, result)
         return {**result, "_cached": False}
     try:
-        result = await get_processor().query({"question": question, "filters": filters, "options": options})
+        query_body = {"question": question, "filters": filters, "options": options_for_hash}
+        if engine == "langgraph" and LANGGRAPH_AVAILABLE:
+            result = await get_graph_executor().query(query_body)
+        else:
+            result = await get_processor().query(query_body)
         result["hash_key"] = hash_key
+        result["rag_engine"] = engine
         save_cache(hash_key, result)
         return {**result, "_cached": False}
     except Exception as e:
-        logger.error(f"execution.py query failed: {e}")
-        raise HTTPException(500, f"Query failed: {e}")
+        msg = str(e)
+        logger.error(f"rag query failed: {msg}")
+        if "MISSING API KEY" in msg:
+            raise HTTPException(400, msg)
+        raise HTTPException(500, f"Query failed: {msg}")
+
+@app.get("/api/graph")
+async def rag_graph_schema():
+    """LangGraph schema for debugging/visualization (if enabled)."""
+    if not LANGGRAPH_AVAILABLE:
+        raise HTTPException(404, "LangGraph engine not available")
+    g = get_graph_executor().graph
+    return {
+        "schema": getattr(g, "schema", None),
+        "nodes": list(getattr(g, "nodes", [])),
+        "edges": list(getattr(g, "edges", [])),
+    }
 
 @app.post("/api/report/download")
 async def download_report(request: Request):

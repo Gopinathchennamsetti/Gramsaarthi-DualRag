@@ -82,6 +82,10 @@ npm run dev
 # → http://localhost:5173
 ```
 
+Notes:
+- In `npm run dev`, the frontend calls `/api/...` and Vite proxies to `http://localhost:8080` (see `frontend/vite.config.js`).
+- To override the backend base URL, run with `VITE_API_BASE_URL=http://localhost:8080 npm run dev` (or set it in a Vite `.env` file).
+
 ---
 
 ## Hash-based Caching

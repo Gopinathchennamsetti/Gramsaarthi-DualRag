@@ -3,3 +3,9 @@ uvicorn[standard]>=0.29.0
 python-multipart>=0.0.9
 
 reportlab>=4.2.0
+
+# LangGraph - State machine framework for multi-step RAG workflows
+langgraph>=0.1.0
+
+# LangSmith - Optional: for execution tracing, debugging, and monitoring
+langsmith>=0.1.0
